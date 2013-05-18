@@ -247,7 +247,7 @@ class BondLengths(Tab):
         
         self.draw()
         
-        self.res_im = wx.Image(self.s.proot + 'Resources/'+self._rtypess[self._residue_type].lower()+'.png', wx.BITMAP_TYPE_PNG).Scale(self._res_size[0], self._res_size[1]).ConvertToBitmap()
+        self.res_im = wx.Image(self.s.proot + 'Resources/gui_resources/'+self._rtypess[self._residue_type].lower()+'.png', wx.BITMAP_TYPE_PNG).Scale(self._res_size[0], self._res_size[1]).ConvertToBitmap()
         self.res.SetBitmap(self.res_im)
         
             #if 'avg' in self._residues:
@@ -269,7 +269,7 @@ class BondLengths(Tab):
     
         self.residue_info_title.SetLabel('Residue Info: ' + tu + '-' + str(rid))
        
-        self.res_im = wx.Image(self.s.proot + 'Resources/'+self._rtypess[self._residue_type].lower()+'.png', wx.BITMAP_TYPE_PNG).Scale(self._res_size[0], self._res_size[1]).ConvertToBitmap()
+        self.res_im = wx.Image(self.s.proot + 'Resources/gui_resources/'+self._rtypess[self._residue_type].lower()+'.png', wx.BITMAP_TYPE_PNG).Scale(self._res_size[0], self._res_size[1]).ConvertToBitmap()
         memDC = wx.MemoryDC()
         #memDC.SetTextForeground((0,0,0));
         memDC.SetFont( wx.Font( 10, wx.DEFAULT, wx.NORMAL, wx.NORMAL) )
