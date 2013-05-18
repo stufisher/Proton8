@@ -1,0 +1,25 @@
+TProton8
+v7
+r0
+t374866845.153349
+cCheck dependencies
+cExternalBuildToolExecution Proton8
+
+N/Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python
+c00000000000000000000000000000000
+t2
+s0
+
+CCheck dependencies
+r0
+lSLF07#2@18"Check dependencies374866845#374866845#0(0"0(0#1#0"8247620834010738688#0"0#
+
+CExternalBuildToolExecution Proton8
+s374866845.085452
+e374866845.153286
+r0
+xExternalBuildToolExecution
+xProton8
+oerror: can't exec '/Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python' (No such file or directory)
+lSLF07#2@23"Run external build tool374866845#374866845#0(103"error: can't exec '/Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python' (No such file or directory)1(4@95"Can't exec '/Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python' (No such file or directory)374866845#0#103#0(1@0"0(0#0#0"7955925896872814592#112"    cd /Users/Stu/Dropbox/Proton8    setenv ACTION     /Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python71#
+
