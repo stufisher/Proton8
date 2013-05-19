@@ -1,17 +1,33 @@
 import wx
+import os
 
 
+# File browser control
 class FileBrowser:
 
-    def __init__(self, parent, mask):
-
-        self._browse = wx.Button(self, -1, 'Browse', size=(70,25))
-        self._browse.Bind(wx.EVT_BUTTON, self._get_cif)
-        self._label = wx.TextCtrl(self, -1, size=(250,25))
+    def __init__(self, parent, mask, title):
+        self._parent = parent
+        self._mask = mask
+        self._title = title
+        
+        self._browse = wx.Button(parent, -1, 'Browse')#, size=(50,25))
+        self._browse.Bind(wx.EVT_BUTTON, self._get_file)
+        self._file = wx.TextCtrl(parent, -1)#, size=(250,25))
         
         self._browse_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._browse_sizer.Add(self._label)
-        self._browse_sizer.Add(self._browse, wx.EXPAND)
+        self._browse_sizer.Add(self._file, 3, wx.EXPAND)
+        self._browse_sizer.Add(self._browse, 1, wx.EXPAND)
 
-    def get_file(self):
-        return self._browse.GetValue()
+    def _get_file(self, event):
+        dlg = wx.FileDialog(self._parent, self._title, os.getcwd(), "", self._mask, wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            self._file.SetLabel(dlg.GetPath())
+
+        dlg.Destroy()
+
+
+    def file(self):
+        return self._file.GetValue()
+    
+    def sizer(self):
+        return self._browse_sizer
