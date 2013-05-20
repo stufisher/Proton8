@@ -24,6 +24,7 @@ from Tab import Tab
 from Validation import Validation
 from BondLengths import BondLengths
 from AutoProcess import AutoProcessManager, AutoProcess
+from Controls import FileBrowser
 
 import matplotlib
 matplotlib.use('WXAgg', False)
@@ -656,6 +657,10 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._total_title, 0, wx.EXPAND)
         self.input_sizer.Add(self._total_cycles, 0)
     
+        self._custom_file = FileBrowser(self, 'Text File (*.txt)|*.txt', 'Select a text file containing custom shelx commands')
+        self.input_sizer.Add(wx.StaticText(self, -1, 'Custom Command / Restraints'), 0, wx.EXPAND)
+        self.input_sizer.Add(self._custom_file.sizer(), 0, wx.EXPAND)
+        
         self._button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._startb = wx.Button(self, 0, 'Start')
         self._startb.Bind(wx.EVT_BUTTON, self._start)
@@ -756,8 +761,8 @@ class NewRefinement(wx.Dialog):
         for s in selected:
             residues.append(self._residue_list[s])
         
-                #title, refln, input, type, cycles, res, resl, residues
-        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue()}
+        #title, refln, input, type, cycles, res, resl, residues
+        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file()}
 
                 
 # ----------------------------------------------------------------------------
@@ -875,6 +880,15 @@ class Summary(wx.Frame):
             self.table.Add(wx.StaticText(self, -1,'Yes' if p['options']['hydrogens'] else 'No'))
             self.table.Add(wx.StaticText(self, -1, 'Anistropic:'))
             self.table.Add(wx.StaticText(self, -1,'Yes' if p['options']['anis'] else 'No'))
+
+            self.table.Add(wx.StaticText(self, -1, 'Custom Commands:'))
+        
+            cust = 'N/A'
+            if 'custom' in p['options']:
+                if p['options']['custom']:
+                    cust = p['options']['custom']
+        
+            self.table.Add(wx.StaticText(self, -1, cust))
         
         self.fig = Figure((3.0, 2.0), dpi=100)
         col = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)

@@ -14,11 +14,12 @@ from wxtbx import bitmaps, metallicbutton, icons
 from iotbx import mtz, cif, reflection_file_reader
 
 from Constants import *
-from Shelx import MTZImporter, CIFImporter, PDBImporter
+from Shelx import CIFImporter, PDBImporter
 from Refinement import Refinement
 from Project import Project
 from Tab import Tab
 from Processing import Summary
+from Controls import FileBrowser
 
 class Manager(Tab): 
 
@@ -173,19 +174,7 @@ class Jobs(Tab):
             
             p['r'] = 'N/A' if p['r'] == -1 else (p['r'] if type(p['r']) == type(str()) else str('%.4f' % p['r']))
             self.job_list.SetStringItem(i, 5, p['r'])
-        
-    #@Tab.wproj
-    #def _import_mtz(self, event):
-    #    dlg = NewMTZ(self, -1, 'Import MTZ File')
-    #    val = dlg.ShowModal()
-        
-    #    if val == 1:
-    #        mtz, f, sigf, rfree = dlg.get_values()
-            
-    #        if f and sigf and rfree:
-    #            MTZImporter(mtz, f, sigf, rfree, self._project.root())
-            
-    #    dlg.Destroy()
+    
         
     @Tab.wproj
     def _import_pbd(self, event):
@@ -199,6 +188,7 @@ class Jobs(Tab):
         
             if p.finished():
                 self.set_status('PDB file sucessfully imported')
+                wx.MessageBox('Sucesss', 'Model file successfully imported', style=wx.OK | wx.CENTRE)
         
         dlg.Destroy()
 
@@ -214,6 +204,7 @@ class Jobs(Tab):
 
                 if c.finished():
                     self.set_status('Reflection file successfully imported')
+                    wx.MessageBox('Sucesss', 'Reflection file successfully imported', style=wx.OK | wx.CENTRE)
             
         dlg.Destroy()
 
@@ -507,103 +498,18 @@ class Retrieve(wx.Dialog):
         self._gauge_label.SetLabel(text)
         self._gauge.SetValue(point)
 
-        
-# ----------------------------------------------------------------------------
-# Import MTZ Dialog
-class NewMTZ(wx.Dialog):
-    def __init__(self, parent, id, title):
-        wx.Dialog.__init__(self, parent, id, title)#, size=(330,340))
-        
-        self._mtz = None
-        
-        self._input_sizer = wx.GridSizer(cols=2, rows=5, hgap=5, vgap=5)
-        self._inputs = [
-            wx.StaticText(self, -1, 'MTZ File'),
-            wx.Button(self, -1, 'Browse'),
-            wx.StaticText(self, -1, ''),
-            wx.StaticText(self, -1, ''),                        
-            wx.StaticText(self, -1, 'Reflections'),
-            wx.ComboBox(self, -1, choices=[], style=wx.CB_READONLY),
-            wx.StaticText(self, -1, 'Std Deviations'),
-            wx.ComboBox(self, -1, choices=[], style=wx.CB_READONLY),            
-            wx.StaticText(self, -1, 'FreeR Set'),
-            wx.ComboBox(self, -1, choices=[], style=wx.CB_READONLY),
-        ]
-        
-        self._inputs[1].Bind(wx.EVT_BUTTON, self._get_mtz)
-        
-        for i in range(len(self._inputs)):
-            self._input_sizer.Add(self._inputs[i], 0, wx.EXPAND|wx.TOP|wx.LEFT, 5)
-
-        self._buttons = wx.BoxSizer(wx.HORIZONTAL)
-        self._buttons.Add(wx.Button(self, 0, 'Import'), 0, wx.EXPAND|wx.ALL, 5)
-        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 0, wx.EXPAND|wx.ALL, 5)
-                
-        self.Bind(wx.EVT_BUTTON, self._import, id=0)
-        self.Bind(wx.EVT_BUTTON, self._close, id=1)          
-        
-        self.main = wx.BoxSizer(wx.VERTICAL)
-        self.main.Add(self._input_sizer)
-        self.main.Add(self._buttons)        
-        
-        self.SetSizer(self.main)
-        
-
-    def _close(self, event):
-        self.EndModal(0)
-
-    def _import(self, event):
-        self.EndModal(1)
-        
-    def get_values(self):
-        return self._mtz, self._inputs[5].GetValue(), self._inputs[7].GetValue(), self._inputs[9].GetValue()
-        
-    def _get_mtz(self, event):
-        dlg = wx.FileDialog(self, "Select an MTZ File", os.getcwd(), "", "*.mtz", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            self._mtz = str(dlg.GetPath())
-            self._inputs[3].SetLabel(self._mtz)
-            #self._inputs[13].SetLabel(self._mtz)
-            
-            m = mtz.object(self._mtz)
-            
-            self._inputs[5].Clear()
-            self._inputs[7].Clear()
-            self._inputs[9].Clear()
-            
-            for col in m.columns():
-                if col.type() == 'J' or col.type() == 'F':
-                    self._inputs[5].Append(col.label())
-
-                if col.type() == 'Q':
-                    self._inputs[7].Append(col.label())
-                
-                if col.type() == 'I':
-                    self._inputs[9].Append(col.label())
-            
-        dlg.Destroy()
-        
 
 # ----------------------------------------------------------------------------
 # Import Reflections Dialog
 class NewCIF(wx.Dialog):
     def __init__(self, parent, id, title):
         wx.Dialog.__init__(self, parent, id, title)#, size=(330,340))
-        
-        self._cif = None
-        
-        self._browse = wx.Button(self, -1, 'Browse', size=(70,25))
-        self._browse.Bind(wx.EVT_BUTTON, self._get_cif)
-        self._label = wx.TextCtrl(self, -1, size=(250,25))
-        
-        self._browse_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._browse_sizer.Add(self._label)
-        self._browse_sizer.Add(self._browse, wx.EXPAND)
-        
+
+        self._browse = FileBrowser(self, 'CIF File (*.cif)|*.cif|MTZ File (*.mtz)|*.mtz', 'Select a reflection file', callback=self._refresh)
         self._input_sizer = wx.FlexGridSizer(cols=2, rows=3, hgap=5, vgap=5)
         self._inputs = [
             wx.StaticText(self, -1, 'Reflection'),
-            self._browse_sizer,
+            self._browse.sizer(),
             wx.StaticText(self, -1, 'F, SigF'),
             wx.ComboBox(self, -1, choices=[], style=wx.CB_READONLY),
             wx.StaticText(self, -1, 'FreeR'),
@@ -635,17 +541,10 @@ class NewCIF(wx.Dialog):
         self.EndModal(1)
         
     def get_values(self):
-        return self._cif, self._inputs[3].GetValue(), self._inputs[5].GetValue()
-        
-    def _get_cif(self, event):
-        dlg = wx.FileDialog(self, "Select a Reflection File", os.getcwd(), "", "CIF File (*.cif)|*.cif|MTZ File (*.mtz)|*.mtz", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            self._cif = str(dlg.GetPath())
-            self._label.SetLabel(self._cif)
-            
-            #m = cif.reader(self._cif)
-            print self._cif, type(self._cif)
-            m = reflection_file_reader.any_reflection_file(self._cif)
+        return self._browser.file(), self._inputs[3].GetValue(), self._inputs[5].GetValue()
+
+    def _refresh(self):
+            m = reflection_file_reader.any_reflection_file(self._browse.file())
             
             self._inputs[3].Clear()
             self._inputs[5].Clear()
@@ -656,32 +555,17 @@ class NewCIF(wx.Dialog):
                 else:
                     self._inputs[5].Append(col.info().label_string())
             
-        dlg.Destroy()
-
 
 # ----------------------------------------------------------------------------
 # Import PDB File  
 class NewPDB(wx.Dialog):
     def __init__(self, parent, id, title):
         wx.Dialog.__init__(self, parent, id, title)#, size=(330,340))
-        
-        self._mtz = None
-        
-        self._inputs = [
-            wx.StaticText(self, -1, 'PDB File'),
-            wx.Button(self, -1, 'Browse'),
-            wx.TextCtrl(self, -1, '', size=(200,20)),
-        ]
-        
-        self._inputs[1].Bind(wx.EVT_BUTTON, self._get_pdb)
-        
-        self.file_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.file_box.Add(self._inputs[2], 0, wx.EXPAND)
-        self.file_box.Add(self._inputs[1], 0, wx.EXPAND)
 
         self._input_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._input_sizer.Add(self._inputs[0], 0, wx.EXPAND|wx.TOP|wx.LEFT, 5)
-        self._input_sizer.Add(self.file_box, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
+        self._browse = FileBrowser(self, '*.pdb', 'Select a PDB File')
+        self._input_sizer.Add(wx.StaticText(self, -1, 'PDB File'), 0, wx.EXPAND|wx.TOP|wx.LEFT, 5)
+        self._input_sizer.Add(self._browse.sizer())
 
         self._buttons = wx.BoxSizer(wx.HORIZONTAL)
         self._buttons.Add(wx.Button(self, 0, 'Import'), 0, wx.EXPAND|wx.ALL, 5)
@@ -696,14 +580,6 @@ class NewPDB(wx.Dialog):
         
         self.SetSizer(self.main)
         self.Fit()
-        
-    def _get_pdb(self, event):
-        dlg = wx.FileDialog(self, "Select a PDB File", os.getcwd(), "", "*.pdb", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            self._pdb = str(dlg.GetPath())
-            self._inputs[2].SetLabel(self._pdb)
-            
-        dlg.Destroy()
 
 
     def _close(self, event):
@@ -713,5 +589,5 @@ class NewPDB(wx.Dialog):
         self.EndModal(1)
         
     def get_file(self):
-        return self._pdb
+        return self._browse.file()
  

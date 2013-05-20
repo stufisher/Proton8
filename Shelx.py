@@ -7,7 +7,7 @@ import re
 from operator import itemgetter
 from itertools import groupby
 
-from iotbx import mtz, pdb, cif, reflection_file_reader
+from iotbx import pdb, reflection_file_reader
 from iotbx.shelx.write_ins import LATT_SYMM
 from mmtbx.monomer_library import server
 
@@ -75,7 +75,18 @@ class Shelx:
                     
         if 'anis' in options:
             self._ins.insert(id+1, 'ANIS')
-        
+
+        if 'custom' in options:
+            if options['custom']:
+                if os.path.exists(options['custom']):
+                    file = open(options['custom'])
+                    cmds = file.read().split('\n')
+                    file.close()
+
+                    for l in cmds:
+                        self._ins.insert(id+1, l.strip())
+
+
     def set_res(self, res, resl):
         for i,l in enumerate(self._ins):
             if l.find('SHEL') > -1:
@@ -501,49 +512,7 @@ class PDBImporter:
             for ci in cifs:
                 self._srv.process_cif_object(cif.reader(input_string=cifs[ci]).model())
                 self._residues.append(ci)
-                
             
-        
-# ----------------------------------------------------------------------------       
-# MTZ -> Shelx HKL
-class MTZImporter:
-    
-    def __init__(self, mtz_file, f, sigf, rfree, root):
-        if os.path.exists(mtz_file):
-            input = mtz.object(mtz_file)
-            
-            h,k,l = [input.get_column('H').extract_values(), input.get_column('K').extract_values(), input.get_column('L').extract_values()]
-            t = input.get_column(str(f)).type()
-            fs = input.get_column(str(f)).extract_values()
-            sigfs = input.get_column(str(sigf)).extract_values()
-            rfree = input.get_column(str(rfree)).extract_values()
-            
-            maxf = max(fs)
-            
-            sf = 1
-            if maxf > 99999:
-                sf = maxf/99999
-            
-            hkl = []
-            for i,ha in enumerate(h):
-                if fs[i] is not None:
-                    free = 1
-                    if rfree[i] == 0:
-                        free = -1
-                
-                    hkl.append("%4d%4d%4d%8.2f%8.2f%4d" % (h[i], k[i], l[i], fs[i]/sf, sigfs[i]/sf, free))
-            
-            hkl.append("   0   0   0    0.00    0.00")
-            
-            if t == 'J':
-                t = 'I'
-            else:
-                t = 'F'
-            
-            file = os.path.basename(mtz_file).replace('.mtz', '')
-            output = open(root+'/'+file+'_'+t+'.hkl', 'w')
-            output.write('\n'.join(hkl))
-            output.close()
 
 
 # ----------------------------------------------------------------------------
@@ -554,7 +523,6 @@ class CIFImporter:
         self._complete = False
         
         if os.path.exists(cif_file):
-            #input = cif.reader(cif_file)
             input = reflection_file_reader.any_reflection_file(cif_file)
             
             for ma in input.as_miller_arrays():
