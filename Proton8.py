@@ -208,11 +208,11 @@ class SettingsDialog(wx.Dialog):
         self.sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
 
         self.sizer.Add(wx.StaticText(self, -1, 'Coot Path'), 0, wx.EXPAND)
-        self._coot = FileBrowser(self, '', 'Select your COOT directory', True)
+        self._coot = FileBrowser(self, '', 'Select your COOT directory')
         self.sizer.Add(self._coot.sizer(), 0, wx.EXPAND)
             
         self.sizer.Add(wx.StaticText(self, -1, 'PHENIX Path'), 0, wx.EXPAND)
-        self._phenix = FileBrowser(self, '', 'Select your PHENIX directory', True)
+        self._phenix = FileBrowser(self, '', 'Select your PHENIX directory', dir=True)
         self.sizer.Add(self._phenix.sizer(), 0, wx.EXPAND)
         
         self._ok = wx.Button(self, -1, 'Save')
