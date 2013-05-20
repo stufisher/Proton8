@@ -5,10 +5,11 @@ import os
 # File browser control
 class FileBrowser:
 
-    def __init__(self, parent, mask, title):
+    def __init__(self, parent, mask, title, dir=False):
         self._parent = parent
         self._mask = mask
         self._title = title
+        self._dir = dir
         
         self._browse = wx.Button(parent, -1, 'Browse')#, size=(50,25))
         self._browse.Bind(wx.EVT_BUTTON, self._get_file)
@@ -19,7 +20,11 @@ class FileBrowser:
         self._browse_sizer.Add(self._browse, 1, wx.EXPAND)
 
     def _get_file(self, event):
-        dlg = wx.FileDialog(self._parent, self._title, os.getcwd(), "", self._mask, wx.OPEN)
+        if self._dir:
+            dlg = wx.DirDialog(self._parent, self._title, os.getcwd())
+        else:
+            dlg = wx.FileDialog(self._parent, self._title, os.getcwd(), "", self._mask, wx.OPEN)
+        
         if dlg.ShowModal() == wx.ID_OK:
             self._file.SetLabel(dlg.GetPath())
 
