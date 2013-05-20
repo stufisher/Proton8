@@ -29,14 +29,19 @@ from Manager import Manager, Jobs
 from Error import ErrorHandler
 from Tab import Tab
 from Settings import Settings
+from Controls import FileBrowser
 
 #from Shelx import PDBImporter
 
 import wxtbx.bitmaps
 
+# ----------------------------------------------------------------------------
+# Proton8 Main Frame
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title):
         self._settings = Settings()
+        
+        
         
         #PDBImporter('./test/3HLX.pdb', '.')
         #exit(1)
@@ -54,6 +59,8 @@ class MainFrame(wx.Frame):
         
         self.Bind(wx.EVT_TOOL, self._on_close, quit)
         self.Bind(wx.EVT_TOOL, self.start_coot, coot)
+        self.Bind(wx.EVT_TOOL, self._show_settings, settings)
+        self.Bind(wx.EVT_TOOL, self._show_about, about)
         
         self._coot_timer = None
         self._coot_process = None
@@ -76,7 +83,7 @@ class MainFrame(wx.Frame):
         Jobs.set_load_refinement(self.sheet2.load_refinement)
         Jobs.set_auto_refinement(self.sheet2.auto_refinement)
 
-        nb.AddPage(self.sheet1, "Manager")
+        nb.AddPage(self.sheet1, "Manage")
         nb.AddPage(self.sheet2, "Process")
         nb.AddPage(self.sheet3, "Compare")
 
@@ -90,7 +97,15 @@ class MainFrame(wx.Frame):
         
         #self.sheet1.sheet2._test()
         
-        
+    
+    def _show_settings(self, event):
+        dlg = SettingsDialog(self)
+        dlg.Show(True)
+    
+    def _show_about(self, event):
+        dlg = AboutDialog(self)
+        dlg.Show(True)
+    
         
     def set_status(self, text, fld =0):
         self.sb.SetStatusText(text, fld)
@@ -129,6 +144,9 @@ class MainFrame(wx.Frame):
                 self._coot_process.terminate()
         self.Destroy()
 
+
+# ----------------------------------------------------------------------------
+# Proton8 App
 class Proton8(wx.App):
     #outputWindowClass = ErrorHandler
     
@@ -141,7 +159,91 @@ class Proton8(wx.App):
          return True
 
 
+# ----------------------------------------------------------------------------
+# About Dialog
+class AboutDialog(wx.Dialog):
 
+    def __init__(self, parent):
+        wx.Dialog.__init__(self, parent, -1, 'About')
+
+        credits = """When using Proton8 please reference: Fisher et al., Acta Dxx, 20xx, xxx
+
+Dependencies
+------------
+cctbx - http://cctbx.sourceforge.org
+matplotlib - http://matplotlib.org
+wxpython - http://wxpython.org
+
+polygon - 
+phenix.elbow
+reduce
+probe
+
+Thanks
+------
+Nat Echols -"""
+            
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.sizer.Add(wx.StaticText(self, -1, 'Proton8 is developed by Stu Fisher'), 0, wx.EXPAND|wx.ALL, 5)
+        self.sizer.Add(wx.StaticText(self, -1, 'fisher@ill.fr'), 0, wx.EXPAND|wx.ALL, 5)
+        self.sizer.Add(wx.TextCtrl(self, -1, credits, style=wx.TE_MULTILINE, size=(450, 200)), 0, wx.EXPAND|wx.ALL, 5)
+
+        self.SetSizer(self.sizer)
+        self.Fit()
+
+
+# ----------------------------------------------------------------------------
+# Settings Dialog
+class SettingsDialog(wx.Dialog):
+
+    @staticmethod
+    def set_settings(s):
+        SettingsDialog.s = s
+    
+    
+    def __init__(self, parent):
+        wx.Dialog.__init__(self, parent, -1, 'Settings')
+
+        self.sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
+
+        self.sizer.Add(wx.StaticText(self, -1, 'Coot Path'), 0, wx.EXPAND)
+        self._coot = FileBrowser(self, '', 'Select your COOT directory', True)
+        self.sizer.Add(self._coot.sizer(), 0, wx.EXPAND)
+            
+        self.sizer.Add(wx.StaticText(self, -1, 'PHENIX Path'), 0, wx.EXPAND)
+        self._phenix = FileBrowser(self, '', 'Select your PHENIX directory', True)
+        self.sizer.Add(self._phenix.sizer(), 0, wx.EXPAND)
+        
+        self._ok = wx.Button(self, -1, 'Save')
+        self._cb = wx.Button(self, -1, 'Close')
+        self._cb.Bind(wx.EVT_BUTTON, self._on_close)
+        self._ok.Bind(wx.EVT_BUTTON, self._save)
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer.Add(self._ok)
+        self.button_sizer.Add(self._cb)
+            
+            
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer.Add(self.sizer, 1, wx.EXPAND|wx.ALL, 5)
+        self.main_sizer.Add(self.button_sizer, 0, wx.EXPAND|wx.ALL, 5)
+        
+        self.SetSizer(self.main_sizer)
+        self.Fit()
+
+
+    def _on_close(self, event):
+        self.EndModal(0)
+        self.Destroy()
+
+
+    def _save(self, event):
+        self.s.val('coot', self._coot.file())
+        self.s.val('phenix', self._phenix.file())
+
+
+# ----------------------------------------------------------------------------
+# Coot Client and Magic Method
 class CootClient:
     
     @staticmethod
