@@ -313,21 +313,27 @@ class Process(Tab):
         self._refinement = pickle.load(open(file))
         self._clear_figure()
         self._refinement_cycle()
+        self.show_buttons()
     
-        log = metallicbutton.MetallicButton(self, -1, 'View Log', '', bitmaps.fetch_icon_bitmap("mimetypes", "log"), size=(105, 34))
-        coot = metallicbutton.MetallicButton(self, -1, 'View In Coot', '', bitmaps.fetch_icon_bitmap("custom", "coot"), size=(105, 34))
         
-        self.Bind(wx.EVT_BUTTON, self.view_log, log)
-        self.Bind(wx.EVT_BUTTON, self.load_coot, coot)
-        self.button_sizer.Add(log, 0, wx.EXPAND|wx.ALL, 2)
-        self.button_sizer.Add(coot, 0, wx.EXPAND|wx.ALL, 2)
+    def show_buttons(self):
+        if hasattr(self, 'abortb'):
+            self.abortb.Hide()
+        
+        self.logb = metallicbutton.MetallicButton(self, -1, 'View Log', '', bitmaps.fetch_icon_bitmap("mimetypes", "log"), size=(105, 34))
+        self.cootb = metallicbutton.MetallicButton(self, -1, 'View In Coot', '', bitmaps.fetch_icon_bitmap("custom", "coot"), size=(105, 34))
+        
+        self.Bind(wx.EVT_BUTTON, self.view_log, self.logb)
+        self.Bind(wx.EVT_BUTTON, self.load_coot, self.cootb)
+        self.button_sizer.Add(self.logb, 0, wx.EXPAND|wx.ALL, 2)
+        self.button_sizer.Add(self.cootb, 0, wx.EXPAND|wx.ALL, 2)
     
         self.Fit()
     
     def start_refinement(self, type, root, title, res, resl, cycles, ins, hkl, id, options):
-        abort = metallicbutton.MetallicButton(self, -1, 'Abort', '', bitmaps.fetch_icon_bitmap("actions", "stop"), size=(105, 34))
-        self.Bind(wx.EVT_BUTTON, self.abort, abort)
-        self.button_sizer.Add(abort, 0, wx.EXPAND|wx.ALL, 2)
+        self.abortb = metallicbutton.MetallicButton(self, -1, 'Abort', '', bitmaps.fetch_icon_bitmap("actions", "stop"), size=(105, 34))
+        self.Bind(wx.EVT_BUTTON, self.abort, self.abortb)
+        self.button_sizer.Add(self.abortb, 0, wx.EXPAND|wx.ALL, 2)
         self.Fit()
         
         self._refinement = Refinement(self, type, root, title, res, resl, cycles, ins, hkl, id, options)
@@ -353,6 +359,7 @@ class Process(Tab):
         
     def _refinement_finished(self):
         self._refinement_cycle()
+        self.show_buttons()
         debug_print('process finished...')
         
         #if hasattr(self, '_finished_callback'):
@@ -802,6 +809,9 @@ class NewRefinement(wx.Dialog):
         ty = self._refinement_type.GetCurrentSelection()
         if ty == -1:
             ty = 0
+        tg = self._target.GetCurrentSelection()
+        if tg == -1:
+            tg = 0
         
         residues = []
         selected = self._residues.GetSelections()
@@ -809,7 +819,7 @@ class NewRefinement(wx.Dialog):
             residues.append(self._residue_list[s])
         
         #title, refln, input, type, cycles, res, resl, residues
-        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file(), 'custom_text': str(self._custom_text.GetValue()), 'target': self._target.GetCurrentSelection()}
+        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file(), 'custom_text': str(self._custom_text.GetValue()), 'target': tg}
 
                 
 # ----------------------------------------------------------------------------
