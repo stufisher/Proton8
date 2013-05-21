@@ -64,17 +64,23 @@ class Shelx:
     
     
         custom_damp = False
+        cust_opts = []
         if 'custom' in options:            
             if options['custom']:
                 if os.path.exists(options['custom']):
                     file = open(options['custom'])
-                    cmds = file.read().split('\n')
+                    cust_opts = file.read().split('\n')
                     file.close()
 
-                    for l in cmds:
-                        if 'DAMP' in l:
-                            custom_damp = True
-                        self._ins.insert(id+1, l.strip())
+        if 'custom_text' in options:
+            if options['custom_text']:
+                cust_opts.extend(options['custom_text'].split('\n'))
+                    
+        for l in cust_opts:
+            if 'DAMP' in l:
+                custom_damp = True
+                self._ins.insert(id+1, l.strip())
+    
         
         if type == FULL_MATRIX:
             self._ins.insert(id+1, 'ACTA')
