@@ -8,6 +8,7 @@ import os
 import re
 import pickle
 import shutil
+import subprocess
 
 from iotbx.shelx import hklf, crystal_symmetry_from_ins
 from mmtbx import polygon
@@ -367,8 +368,8 @@ class Process(Tab):
         self._values[1].SetLabel(p['status'])
         self._values[2].SetLabel(str(l) + ' of ' + str(p['total_cycles'] + 1))
         self._values[3].SetLabel(str(p['res']) + ' - ' + (str(p['resl'])  if 'resl' in p else '10'))
-        self._values[5].SetLabel(str('' if p['rfree'] == -1 else "%.4f" % p['rfree']))
-        self._values[4].SetLabel(str(p['r'] if type(p['r']) == type(str()) else "%.4f" % p['r']))
+        self._values[5].SetLabel(str('-' if p['rfree'] == -1 else "%.4f" % p['rfree']))
+        self._values[4].SetLabel(str('-' if p['r'] == -1 else (p['r'] if type(p['r']) == type(str()) else "%.4f" % p['r'])))
         
         if l > 0:
             self._values[6].SetLabel(str(p['cycles'][l][2]))
@@ -594,12 +595,26 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(wx.StaticText(self, -1, 'Reflections'))
         self._reflections = wx.ComboBox(self, -1, choices=refls, style=wx.CB_READONLY)
         self._reflections.Bind(wx.EVT_COMBOBOX, self._set_res)
-        self.input_sizer.Add(self._reflections, 0, wx.EXPAND)
+        self._view_refs = metallicbutton.MetallicButton(self, 0, '', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(22, 20))
+        self.Bind(wx.EVT_BUTTON, self._view_file, self._view_refs)
+        
+        self._refs_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._refs_sizer.Add(self._view_refs, 0, wx.EXPAND|wx.RIGHT, 5)
+        self._refs_sizer.Add(self._reflections, 0, wx.EXPAND|wx.GROW)
+        
+        self.input_sizer.Add(self._refs_sizer, 0, wx.EXPAND|wx.GROW)
 
         self.input_sizer.Add(wx.StaticText(self, -1, 'Structure'))
         self._structure = wx.ComboBox(self, -1, choices=inputs, style=wx.CB_READONLY)
         self._structure.Bind(wx.EVT_COMBOBOX, self._set_res)
-        self.input_sizer.Add(self._structure, 0, wx.EXPAND)
+        self._view_struct = metallicbutton.MetallicButton(self, 1, '', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(22, 20))
+        self.Bind(wx.EVT_BUTTON, self._view_file, self._view_struct)
+        
+        self._struct_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._struct_sizer.Add(self._view_struct, 0, wx.EXPAND|wx.RIGHT, 5)
+        self._struct_sizer.Add(self._structure, 0, wx.EXPAND)
+        
+        self.input_sizer.Add(self._struct_sizer, 0, wx.EXPAND)
 
         self.input_sizer.Add(wx.StaticText(self, -1, 'Type'))
         self._refinement_type = wx.ComboBox(self, -1, REFINEMENT_TYPES[0], choices=REFINEMENT_TYPES, style=wx.CB_READONLY)
@@ -658,8 +673,15 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._total_cycles, 0)
     
         self._custom_file = FileBrowser(self, 'Text File (*.txt)|*.txt', 'Select a text file containing custom shelx commands')
+        self._custom_text = wx.TextCtrl(self, -1, '', style=wx.TE_MULTILINE, size=(-1, 100))
+        
         self.input_sizer.Add(wx.StaticText(self, -1, 'Custom Commands'), 0, wx.EXPAND)
-        self.input_sizer.Add(self._custom_file.sizer(), 0, wx.EXPAND)
+        
+        self.custom_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.custom_sizer.Add(self._custom_file.sizer(), 0, wx.EXPAND)
+        self.custom_sizer.Add(self._custom_text, 0, wx.EXPAND)
+        
+        self.input_sizer.Add(self.custom_sizer, 0, wx.EXPAND)
         
         self._button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._startb = wx.Button(self, 0, 'Start')
@@ -686,6 +708,14 @@ class NewRefinement(wx.Dialog):
         self._set_res('')
         self._hydrogens.SetValue(0)
 
+    
+    def _view_file(self, event):
+        file = self._in_files[self._structure.GetCurrentSelection()] if event.GetId() else self._ref_files[self._reflections.GetCurrentSelection()]
+    
+        if os.path.exists(file):
+            cmd = 'open -a TextEdit'
+            subprocess.Popen(cmd.split() +[file])
+    
     def _set_auto(self, event):
         v = self._auto.GetValue() == 1
         self._ur_title.Show(v)
@@ -762,7 +792,7 @@ class NewRefinement(wx.Dialog):
             residues.append(self._residue_list[s])
         
         #title, refln, input, type, cycles, res, resl, residues
-        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file()}
+        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file(), 'custom_text': self._custom_text.GetValue()}
 
                 
 # ----------------------------------------------------------------------------
@@ -872,9 +902,9 @@ class Summary(wx.Frame):
             self.table.Add(wx.StaticText(self, -1, '%.2f - %.2f' % (p['res'], p['resl'])))
             
             self.table.Add(wx.StaticText(self, -1, 'R:'))
-            self.table.Add(wx.StaticText(self, -1, '%.4f' % p['r']))
+            self.table.Add(wx.StaticText(self, -1, '-' if p['r'] == -1 else (p['r'] if type(p['r']) == type(str()) else '%.4f' % p['r'])))
             self.table.Add(wx.StaticText(self, -1, 'Rfree:'))
-            self.table.Add(wx.StaticText(self, -1, '%.4f' % p['rfree']), 0, wx.EXPAND|wx.BOTTOM, 10)
+            self.table.Add(wx.StaticText(self, -1, '-' if p['rfree'] == -1 else '%.4f' % p['rfree']), 0, wx.EXPAND|wx.BOTTOM, 10)
             
             self.table.Add(wx.StaticText(self, -1, 'Hydrogens:'))
             self.table.Add(wx.StaticText(self, -1,'Yes' if p['options']['hydrogens'] else 'No'))
@@ -883,11 +913,18 @@ class Summary(wx.Frame):
 
             self.table.Add(wx.StaticText(self, -1, 'Custom Commands:'))
         
-            cust = 'N/A'
+            cust = ''
             if 'custom' in p['options']:
                 if p['options']['custom']:
                     cust = p['options']['custom']
         
+            if 'custom_text' in p['options']:
+                if p['options']['custom_text']:
+                    cust += "\n" + p['options']['custom_text']
+        
+            if not cust:
+                cust = 'N/A'
+                        
             self.table.Add(wx.StaticText(self, -1, cust))
         
         self.fig = Figure((3.0, 2.0), dpi=100)
