@@ -621,6 +621,11 @@ class NewRefinement(wx.Dialog):
         self._refinement_type.Bind(wx.EVT_COMBOBOX, self._set_type)
         self.input_sizer.Add(self._refinement_type, 0, wx.EXPAND)
 
+        self.input_sizer.Add(wx.StaticText(self, -1, 'Target'))
+        self._target = wx.ComboBox(self, -1, REFINEMENT_TARGETS[0], choices=REFINEMENT_TARGETS, style=wx.CB_READONLY)
+        self._target.Bind(wx.EVT_COMBOBOX, self._set_target)
+        self.input_sizer.Add(self._target, 0, wx.EXPAND)
+        
         self.input_sizer.Add(wx.StaticText(self, -1, 'Cycles'))
         self._cycles = wx.SpinCtrl(self, -1, value='10')
         self.input_sizer.Add(self._cycles, 0)
@@ -725,16 +730,26 @@ class NewRefinement(wx.Dialog):
     
         self.Fit()
     
+    def _set_target(self, event):
+        if self._target.GetCurrentSelection() == CGLS:
+            self._bloc.Hide()
+        else:
+            self._bloc.Show()
+
+        self.main_sizer.Layout()
+        self.Fit()
+
     def _set_type(self, event):
         if self._refinement_type.GetCurrentSelection() == FULL_MATRIX:
             self._cycles.SetValue(1)
             
-            self._bloc.Show()
+            #self._bloc.Show()
             self._rfree.Show()
+            self._target.SetSelection(1)
         else:
             self._cycles.SetValue(10)
-            
-            self._bloc.Hide()
+            self._target.SetSelection(0)
+            #self._bloc.Hide()
             self._rfree.Hide()
         
         if self._refinement_type.GetCurrentSelection() == PART_UNRESTRAINED:
@@ -744,6 +759,8 @@ class NewRefinement(wx.Dialog):
             self._residues_title.Hide()
             self._residues.Hide()
 
+        self._set_target('')
+                
         self.main_sizer.Layout()
         self.Fit()
                 
@@ -792,7 +809,7 @@ class NewRefinement(wx.Dialog):
             residues.append(self._residue_list[s])
         
         #title, refln, input, type, cycles, res, resl, residues
-        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file(), 'custom_text': self._custom_text.GetValue()}
+        return self._title.GetValue(),self._reflections.GetCurrentSelection(),self._structure.GetCurrentSelection(),ty,self._cycles.GetValue(),float(self._res_high.GetValue()),float(self._res_low.GetValue()),{'residues': residues,'hydrogens': self._hydrogens.GetValue(),'bloc': self._bloc.GetValue(),'rfree': self._rfree.GetValue(), 'auto': self._auto.GetValue(), 'ur_cycles': self._ur_cycles.GetValue(), 'total_cycles': self._total_cycles.GetValue(), 'anis': self._anis.GetValue(), 'custom': self._custom_file.file(), 'custom_text': str(self._custom_text.GetValue()), 'target': self._target.GetCurrentSelection()}
 
                 
 # ----------------------------------------------------------------------------
@@ -885,6 +902,9 @@ class Summary(wx.Frame):
             self.table.Add(wx.StaticText(self, -1, p['status']))
             self.table.Add(wx.StaticText(self, -1, 'Type:'))
             self.table.Add(wx.StaticText(self, -1, REFINEMENT_TYPES[p['type']]))
+
+            self.table.Add(wx.StaticText(self, -1, 'Target:'))
+            self.table.Add(wx.StaticText(self, -1, REFINEMENT_TARGETS[p['target']] if 'target' in  p else 'Unknown'))
             
             if p['type'] == PART_UNRESTRAINED:
                 self.table.Add(wx.StaticText(self, -1, 'Unrestrained Residues:'))

@@ -53,9 +53,11 @@ class Refinement:
     
         self._first = 0
         self._type = type
-        self._args = '-b20000' if type == FULL_MATRIX else ''
+        self._args = '-b20000' if options['target'] == LS else ''
         self._input = input
         self._panel = panel
+        
+        print str(options['target']) + ' ' + str(LS) + ' ' + str(options['target'] == LS)
         
         self._start_time = time.time()
         self.timer = wx.Timer(self._panel, 200)

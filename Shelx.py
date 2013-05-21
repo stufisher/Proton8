@@ -28,22 +28,20 @@ class Shelx:
         
     def set_type(self, type, cycles, options):
         if type == RESTRAINED:
-            cmd = 'CGLS ' + str(cycles) + ' -1'
+            cmd = REFINEMENT_TARGETS[options['target']] +  ' ' + str(cycles) + ' -1'
             self._restraints(1)
         
         elif type == PART_UNRESTRAINED:
-            cmd = 'CGLS ' + str(cycles) + ' -1'
+            cmd = REFINEMENT_TARGETS[options['target']] + ' ' + str(cycles) + ' -1'
             self._restraints(0, residues=options['residues'])
             
         elif type == UNRESTRAINED:
-            cmd = 'CGLS ' + str(cycles) + ' -1'
+            cmd = REFINEMENT_TARGETS[options['target']] + ' ' + str(cycles) + ' -1'
             self._restraints(0, all=True)
     
         elif type == FULL_MATRIX:
             cmd = 'L.S. 1' + ('' if options['rfree'] else ' -1')
             self._restraints(0, residues=options['residues'])
-            
-        print 'HYDROGENS ' + str(options['hydrogens'])
             
         rem = []
         for i,l in enumerate(self._ins):
