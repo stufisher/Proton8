@@ -658,7 +658,7 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._total_cycles, 0)
     
         self._custom_file = FileBrowser(self, 'Text File (*.txt)|*.txt', 'Select a text file containing custom shelx commands')
-        self.input_sizer.Add(wx.StaticText(self, -1, 'Custom Command / Restraints'), 0, wx.EXPAND)
+        self.input_sizer.Add(wx.StaticText(self, -1, 'Custom Commands'), 0, wx.EXPAND)
         self.input_sizer.Add(self._custom_file.sizer(), 0, wx.EXPAND)
         
         self._button_sizer = wx.BoxSizer(wx.HORIZONTAL)
