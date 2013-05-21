@@ -130,7 +130,7 @@ class Jobs(Tab):
         if sel > -1:
             shutil.rmtree(self._project.root() + '/' + dirs[sel])
             
-        self._project.job_count(-1)
+        #self._project.job_count(-1)
             
         self.refresh_tabs()
     

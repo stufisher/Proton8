@@ -30,6 +30,8 @@ class Project:
     
 
     def job_count(self, pm = None):
+        return len([name for name in os.listdir(self.root()) if os.path.isdir(name) and name.split('_')[0].isdigit()])
+        
         if pm is None:
             return self._data['job_count']
         else:
@@ -39,7 +41,7 @@ class Project:
     def action(self, action):
         self._data['last_time'] = time()
         self._data['last_action'] = action
-        self._data['job_count'] += 1
+        #self._data['job_count'] += 1
         self._save()
         
     def last_time(self):
