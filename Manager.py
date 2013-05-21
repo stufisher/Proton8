@@ -285,7 +285,7 @@ class Projects(Tab):
         if self.s.current is not None:
             if os.path.exists(self.s.current):
                 #Tab._project = pickle.load(open(self.s.current + '/.proton8/project.pkl', 'rb'))
-                Tab._project = Project(self.s.current)
+                Tab._project = Project(self.s.current, cwd=True)
                 self._update_sb('Project: ' + Tab._project.title(), 1)
             else:
                 self._update_sb('Project: None', 1)
@@ -312,8 +312,6 @@ class Projects(Tab):
 
     def _load_project(self, event):
         sel = self.project_list.GetFirstSelected()
-    
-        print self.s.projects, sel, self.s.current
         
         if sel < len(self.s.projects):
             self.s.load_project(self.s.projects[sel])
