@@ -62,10 +62,26 @@ class Shelx:
                 if 'HFIX' in l:
                     self._ins[i] = ('' if options['hydrogens'] else 'REM ') + self._ins[i].replace('REM ','')
     
+    
+        custom_damp = False
+        if 'custom' in options:            
+            if options['custom']:
+                if os.path.exists(options['custom']):
+                    file = open(options['custom'])
+                    cmds = file.read().split('\n')
+                    file.close()
+
+                    for l in cmds:
+                        if 'DAMP' in l:
+                            custom_damp = True
+                        self._ins.insert(id+1, l.strip())
         
         if type == FULL_MATRIX:
             self._ins.insert(id+1, 'ACTA')
-            self._ins.insert(id+1, 'DAMP 0 15')
+            
+            if not custom_damp:
+                self._ins.insert(id+1, 'DAMP 0 15')
+            
             if options['bloc']:
                 self._ins.insert(id+1, 'BLOC 1')
         else:
@@ -75,16 +91,6 @@ class Shelx:
                     
         if 'anis' in options:
             self._ins.insert(id+1, 'ANIS')
-
-        if 'custom' in options:
-            if options['custom']:
-                if os.path.exists(options['custom']):
-                    file = open(options['custom'])
-                    cmds = file.read().split('\n')
-                    file.close()
-
-                    for l in cmds:
-                        self._ins.insert(id+1, l.strip())
 
 
     def set_res(self, res, resl):
