@@ -1,30 +1,0 @@
-TProton8
-v7
-r0
-t378343436.371134
-cCheck dependencies
-cExternalBuildToolExecution Proton8
-
-N/Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python
-c00000000000000000000000000000000
-t2
-s0
-
-N/Users/vxn01537/.virtual_envs/system/bin/pythonw
-c00000000000000000000000000000000
-t2
-s0
-
-CCheck dependencies
-r0
-lSLF07#2@18"Check dependencies378343436#378343436#0(0"0(0#1#0"3343187568374212096#0"0#
-
-CExternalBuildToolExecution Proton8
-s378343436.296968
-e378343436.371080
-r0
-xExternalBuildToolExecution
-xProton8
-oerror: can't change directory to '/Users/Stu/Dropbox/Proton8' (No such file or directory)
-lSLF07#2@23"Run external build tool378343436#378343436#0(90"error: can't change directory to '/Users/Stu/Dropbox/Proton8' (No such file or directory)1(4@82"Can't change directory to '/Users/Stu/Dropbox/Proton8' (No such file or directory)378343436#0#90#0(1@0"0(0#0#0"8295753032397060096#112"    cd /Users/Stu/Dropbox/Proton8    setenv ACTION     /Users/Stu/Downloads/cctbx_plus_build/bin/wxtbx.python66#
-
