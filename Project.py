@@ -5,7 +5,7 @@ from time import time
 
 class Project:
     
-    def __init__(self, root, title=None):
+    def __init__(self, root, title=None, **kwargs):
         self._data = { 'root': root, 'title': title, 'job_count': 0, 'last_action': '', 'last_time': -1}
     
         if title is None:
@@ -13,11 +13,14 @@ class Project:
             if self._data['root'] != root:
                 self._data['root'] = root
                 self._save()
-            os.chdir(self._data['root'])
+            
+            if 'cwd' in kwargs:
+                    os.chdir(self._data['root'])
     
         else:
             self._save()
-            os.chdir(root)
+            if 'cwd' in kwargs:
+                os.chdir(root)
     
             
     

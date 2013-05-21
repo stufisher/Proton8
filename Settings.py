@@ -60,8 +60,10 @@ class Settings:
     def load_project(self, root):
         if root != self.current:
             if os.path.exists(root + os.sep + '.proton8' + os.sep + 'project.json'):
-                Tab._project = Project(root)
+                Tab._project = Project(root, cwd=True)
                 self._settings['current_root'] = root
+
+                print os.getcwd()
     
     @save
     def add_project(self, root, title):
