@@ -1,5 +1,6 @@
 import os
 import wx
+import re
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -42,7 +43,7 @@ class Ligand(wx.Frame):
                                  'LEU', 'MET', 'PHE', 'TRP', 'TYR', 'VAL', 'HOH', 'DOD']:
                 key = '%s %s-%s' % (a.chain_id, a.resname, a.resid().strip())
                 if not key in self._ligands:
-                    self._ligands[key] = {'at': []}
+                    self._ligands[key] = {'at': [], 'id': a.resid().strip()}
             
                 self._ligands[key]['at'].append(a)
 
@@ -53,9 +54,44 @@ class Ligand(wx.Frame):
             if len(l['at']) < 3:
                 to_del.append(k)
 
+            l['rex'] = {}
+            l['stdevs'] = {}
+            for a in l['at']:
+                an = a.name.strip()
+                for b in l['at']:
+                    bn = b.name.strip()
+                    if a is not b:
+                        if a.distance(b) < 1.8:
+                            l['rex'][an+'-'+bn] = [re.compile(an+'_'+l['id']+' '+bn+'_'+l['id']+' (\d+\.?\d+)\((\d+)\)'),
+                            re.compile(bn+'_'+l['id']+' '+an+'_'+l['id']+' (\d+\.?\d+)\((\d+)\)')]
+    
+    
         for d in to_del:
             del self._ligands[d]
+        
+        
+        if 'stdevs' in kwargs:
+            if os.path.exists(kwargs['stdevs']):
+                stdevs = open(kwargs['stdevs'])
+                start = False
+                for l in stdevs:
+                    if  '_geom_bond_atom_site_label_1' in l:
+                        start = True
+                    if '_geom_angle_atom_site_label_1' in l:
+                        break
+                
+                    if start:
+                        for k,lig in self._ligands.iteritems():
+                            for id,rs in lig['rex'].iteritems():
+                                for r in rs:
+                                    m = r.match(l)
+                                    if m:
+                                        d = pow(10, len((m.group(1).split('.'))[1]))
+                                        lig['stdevs'][id] = float(m.group(2))/d
 
+                stdevs.close()
+    
+        
         self.ax1 = self.fig.add_subplot(111, projection='3d')
         self.ax1.set_position([-0.2, -0.2, 1.4, 1.4])
 
@@ -137,6 +173,7 @@ class Ligand(wx.Frame):
 
             getattr(self.ax1, ax)(mn-diff/2, mx+diff/2)
         
+                
         self._labs = []
         self._alabs = []
         for i,a in enumerate(r['at']):
@@ -146,9 +183,15 @@ class Ligand(wx.Frame):
                 if a is not b:
                     bc = r['c'][j]
                     if a.distance(b) < 1.8:
+                        std = ''
+                        
+                        n = a.name.strip()+'-'+b.name.strip()
+                        if n in r['stdevs']:
+                            std = ' (' + str(r['stdevs'][n]) + ')'
+                        
                         self.ax1.plot([ac[0], bc[0]], [ac[1], bc[1]], [ac[2], bc[2]], 'k-')
                         x3, y3, _ = proj3d.proj_transform(bc[0],bc[1],bc[2], self.ax1.get_proj())
-                        self._labs.append([self.ax1.annotate('%.2f' % a.distance(b), xy=self._midp(x2,y2,x3,y3), size=6), ac, bc])
+                        self._labs.append([self.ax1.annotate('%.2f' % a.distance(b) + std, xy=self._midp(x2,y2,x3,y3), size=6), ac, bc])
             
             self._alabs.append([self.ax1.annotate(a.name.strip(), xy=(x2+0.002,y2+0.002), size=7), ac])
 
