@@ -147,6 +147,7 @@ class BondLengths(Tab):
         self.main.Fit(self)
         
         self.canvas.mpl_connect('button_press_event', self._on_click)
+        self.canvas.mpl_connect('pick_event', self._show_series)
     
     def _save_data(self, e):
         dlg = wx.FileDialog(self, "Save Data as CSV", os.getcwd(), "", "*.csv", wx.SAVE)
@@ -163,7 +164,7 @@ class BondLengths(Tab):
     
     def _view_ligands(self, event):
         if self._bond_lengths is not None:
-            frame = Ligand(self._bond_lengths, self._bond_lengths.replace('_start.pdb', '').replace(self._project.root(), ''))
+            frame = Ligand(self._bond_lengths, self._bond_lengths.replace('_start.pdb', '').replace(self._project.root(), ''), stdevs=self._std_devs)
             frame.Show(True)
 
         
@@ -317,12 +318,19 @@ class BondLengths(Tab):
     
     def _on_click(self,event):
         if event.xdata:
-            self._highlight = int(round(event.xdata, 0))
+            id = int(round(event.xdata, 0))
+            if id < len(self._residue_selection):
+                self._highlight = id
+    
         else:
             self._highlight = -1
+    
+        h = self._highlight
+        self._highlight_span.set_xy(([h-0.5, 0],[h-0.5, 1],[h+0.5, 1],[h+0.5, 0],[h-0.5, 0]))
+        self.canvas.draw()
+                
         self._show_residue()
-        #self.draw()
-        
+
 
     def _get_inputs(self, type='res'):
         inputs = []
@@ -345,29 +353,28 @@ class BondLengths(Tab):
         self._omitted, self._residues = self._pdbt.get_bond_lengths(self._bond_lengths)
 
         if os.path.exists(self._std_devs):
-            print 'stds exist'
             devs = open(self._std_devs)
-            asp_re = re.compile(r'CG_(\d+) OD(1|2)_\1 (\d+\.\d+)\((\d+)\)')
-            glu_re = re.compile(r'CD_(\d+) OE(1|2)_\1 (\d+\.\d+)\((\d+)\)')
+            asp_re = re.compile(r'CG_(\d+) OD(1|2)_\1 (\d+\.?\d+)\((\d+)\)')
+            glu_re = re.compile(r'CD_(\d+) OE(1|2)_\1 (\d+\.?\d+)\((\d+)\)')
         
-            his_re = [re.compile(r'CG_(\d+) CD2_\1 NE2_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'ND1_(\d+) CE1_\1 NE2_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'CE1_(\d+) NE2_\1 CD2_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'CG_(\d+) ND1_\1 CE1_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'CD2_(\d+) CG_\1 ND1_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'NE2_(\d+) CD2_\1 CG_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'NE2_(\d+) CE1_\1 ND1_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'CD2_(\d+) NE2_\1 CE1_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'CE1_(\d+) ND1_\1 CG_\1 (\d+.\d+)\((\d+)\)'),
-                      re.compile(r'ND1_(\d+) CG_\1 CD2_\1 (\d+.\d+)\((\d+)\)'),
+            his_re = [re.compile(r'CG_(\d+) CD2_\1 NE2_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'ND1_(\d+) CE1_\1 NE2_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CE1_(\d+) NE2_\1 CD2_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CG_(\d+) ND1_\1 CE1_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CD2_(\d+) CG_\1 ND1_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'NE2_(\d+) CD2_\1 CG_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'NE2_(\d+) CE1_\1 ND1_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CD2_(\d+) NE2_\1 CE1_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CE1_(\d+) ND1_\1 CG_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'ND1_(\d+) CG_\1 CD2_\1 (\d+\.?\d+)\((\d+)\)'),
                       ]
                       
-            arg_re = [re.compile(r'CZ_(\d+) NH2_\1 (\d+\.\d+)\((\d+)\)'),
-                      re.compile(r'CZ_(\d+) NE_\1 (\d+\.\d+)\((\d+)\)'),
-                      re.compile(r'CZ_(\d+) NH1_\1 (\d+\.\d+)\((\d+)\)'),
-                      re.compile(r'NH2_(\d+) CZ_\1 (\d+\.\d+)\((\d+)\)'),
-                      re.compile(r'NE_(\d+) CZ_\1 (\d+\.\d+)\((\d+)\)'),
-                      re.compile(r'NH1_(\d+) CZ_\1 (\d+\.\d+)\((\d+)\)')
+            arg_re = [re.compile(r'CZ_(\d+) NH2_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CZ_(\d+) NE_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'CZ_(\d+) NH1_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'NH2_(\d+) CZ_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'NE_(\d+) CZ_\1 (\d+\.?\d+)\((\d+)\)'),
+                      re.compile(r'NH1_(\d+) CZ_\1 (\d+\.?\d+)\((\d+)\)')
                      ]
             for s in devs:
                 for t,rex in {'asp': asp_re, 'glu': glu_re}.items():
@@ -442,13 +449,29 @@ class BondLengths(Tab):
         for id,i in enumerate(all):
             self.residue_sel.Append(tu + '-' + str(i))
             self.residue_sel.SetSelection(id, True)
+    
                 
+    def _show_series(self, event):
+        legline = event.artist
+        ol = self.seried[legline]
+        
+        if type(ol) == type(()):
+            for o in ol:
+                o.set_visible(not o.get_visible())
+
+        else:
+            ol.set_visible(not ol.get_visible())
+    
+        self.canvas.draw()
+
 
     def draw(self):
         self.ax1.cla()
         self.ax2.cla()
+        
+        self.series = []
     
-        self.ax2.set_ylabel('B Factor ($A^2$)', fontsize=9)  
+        self.ax2.set_ylabel('$B Factor (\AA^2)$', fontsize=9)  
 
         t  = self._rtypess[self._residue_type].lower()
         tu = self._rtypess[self._residue_type]
@@ -479,9 +502,9 @@ class BondLengths(Tab):
                 dg = 'C-O$\gamma$' if self._residue_type == 0 else 'C-O$\delta$'
                
                 self.ax1.errorbar(xa, l1, yerr=el1, fmt='ro', label=dg+'1')
-                self.ax1.errorbar(xa, l2, yerr=el2, fmt='b^', label=dg+'2')
-                self.ax2.plot(xa, b1, 'go', label='B('+dg+'1)'), 
-                self.ax2.plot(xa, b2, 'y^', label='B('+dg+'2)')
+                self.ax1.errorbar(xa, l2, yerr=el2, fmt='bo', label=dg+'2')
+                self.ax2.plot(xa, b1, '^', label='B('+dg+'1)', color='#FF6666'),
+                self.ax2.plot(xa, b2, '^', label='B('+dg+'2)', color='#3399FF')
                 self.ax1.axhline(y=1.21, color='0.7')
                 self.ax1.axhline(y=1.31, color='0.7')
                 self.ax1.axhspan(1.327, 1.293, alpha=0.6, color='0.9')
@@ -503,7 +526,7 @@ class BondLengths(Tab):
             # his CG CD2 NE2, ND1 CE1 NE2
             elif self._residue_type == 2:
                 self.ax1.errorbar(xa, l1, yerr=el1, fmt='ro', label='CG-CD2-NE2')
-                self.ax1.errorbar(xa, l2, yerr=el2, fmt='b^', label='ND1-CE1-NE2')
+                self.ax1.errorbar(xa, l2, yerr=el2, fmt='bo', label='ND1-CE1-NE2')
                 
                 l3  = [self._residues[t][k][3][0] for k in x ]
                 b3  = [self._residues[t][k][3][2] for k in x ]
@@ -527,11 +550,16 @@ class BondLengths(Tab):
                 else:
                     el5 = [ 0 for k in x ]
                 
-                self.ax1.errorbar(xa, l3, yerr=el3, fmt='g^', label='CD2-NE2-CE1')
-                self.ax1.errorbar(xa, l4, yerr=el4, fmt='c^', label='CE1-ND1-CG')
-                self.ax1.errorbar(xa, l5, yerr=el5, fmt='m^', label='CD2-CG-ND1')
+                self.ax1.errorbar(xa, l3, yerr=el3, fmt='go', label='CD2-NE2-CE1')
+                self.ax1.errorbar(xa, l4, yerr=el4, fmt='co', label='CE1-ND1-CG')
+                self.ax1.errorbar(xa, l5, yerr=el5, fmt='mo', label='CD2-CG-ND1')
                 
-                self.ax2.plot(xa, b1, 'go', xa, b2, 'y^')
+                self.ax2.plot(xa, b1, '^', label='B(CG-CD2-NE2)', color='#FF6666')
+                self.ax2.plot(xa, b2, '^', label='B(ND1-CE1-NE2)', color='#3399FF')
+                self.ax2.plot(xa, b3, '^', label='B(CD2-NE2-CE2)', color='#99FF99')
+                self.ax2.plot(xa, b4, 'c^', label='B(CE1-ND1-CG')
+                self.ax2.plot(xa, b5, 'm^', label='B(CD2-CG-ND1)')
+                              
                 self.ax1.axhline(y=111.2, color='0.7')
                 self.ax1.axhline(y=109.3, color='0.7')
                 self.ax1.axhline(y=107.5, color='0.7')
@@ -540,7 +568,7 @@ class BondLengths(Tab):
                 self.ax1.set_ylabel('Angle ($^\circ$)', fontsize=9)
             
                 angles = ['CG-CD2-NE2', 'ND1-CE1-NE2', 'CD2-NE2-CE1', 'CE1-ND1-CG', 'CD2-CG-ND1']
-                cols = [ [ x, 'ESDS('+x+')', 'B('+x+')'] for x in angles ]
+                cols = [ [ n, 'ESDS('+n+')', 'B('+n+')'] for n in angles ]
                     
                 self._to_save = [['Residue', 'D(ang)', 'S(D(ang))', 'Level']]
                 self._to_save[0][1:1] = cols
@@ -564,11 +592,11 @@ class BondLengths(Tab):
                     el3 = [ 0 for k in x ]
                 
                 self.ax1.errorbar(xa, l1, yerr=el1, fmt='bo', label='CZ-NH2')
-                self.ax1.errorbar(xa, l2, yerr=el2, fmt='r^', label='CZ-NE')
-                self.ax1.errorbar(xa, l3, yerr=el3, fmt='ms', label='CZ-NH1')                
-                self.ax2.plot(xa, b1, 'go', label='B(CZ-NH2)')
-                self.ax2.plot(xa, b2, 'y^', label='B(CZ-NE)')
-                self.ax2.plot(xa, b3, 'cs', label='B(CZ-NH1)')
+                self.ax1.errorbar(xa, l2, yerr=el2, fmt='ro', label='CZ-NE')
+                self.ax1.errorbar(xa, l3, yerr=el3, fmt='go', label='CZ-NH1')
+                self.ax2.plot(xa, b1, '^', label='B(CZ-NH2)', color='#3399FF')
+                self.ax2.plot(xa, b2, '^', label='B(CZ-NE)', color='#FF6666')
+                self.ax2.plot(xa, b3, '^', label='B(CZ-NH1)', color='#99FF99')
                 self.ax1.set_ylim(min(l1+l2)-0.2, max(l1+l2)+0.05)
                 self.ax1.set_ylabel('CZ-X (A)', fontsize=9)
                 self.ax1.axhline(y=1.326, color='0.7')
@@ -592,8 +620,8 @@ class BondLengths(Tab):
             self.averages.SetLabel(txt)
             self.ax2.axhline(y=self._residues['avg']['b'], color=(0.5,0.5,0), ls='--')
             self.ax2.set_ylim(min(b1+b2)-2, max(b1+b2)+20)
-            
-            #self.ax2.set_xlim(-1, len(x))
+    
+            self.ax2.set_xlim(-1, len(x))
             self.ax1.set_xlim(-1, len(x))
             self.ax1.set_xticks(xa)
             self.ax1.set_xticklabels(xs, rotation='vertical', size=8)        
@@ -602,13 +630,21 @@ class BondLengths(Tab):
             self.ax1.tick_params(labelsize=8)
             self.ax2.tick_params(labelsize=8)
 
-            if self._highlight > -1:
-                self.ax1.axvspan(self._highlight-0.5, self._highlight+0.5, alpha=0.3, color='0.9')
+            #if self._highlight > -1:
+            self._highlight_span = self.ax1.axvspan(self._highlight-0.5, self._highlight+0.5, alpha=0.3, color='0.9')
 
             handles, labels = self.ax1.get_legend_handles_labels()
+            handl = [ h[0] for h in handles ]
+            handt = [ (h[0],h[1][0], h[1][1], h[2][0]) for h in handles ]
             handles2, labels2 = self.ax2.get_legend_handles_labels()
-            leg = self.ax2.legend(handles+handles2, labels+labels2, prop={'size':8}, numpoints=1, loc='best', fancybox=True)
+            leg = self.ax2.legend(handl+handles2, labels+labels2, prop={'size':8}, numpoints=1, loc='best', fancybox=True)
             leg.get_frame().set_alpha(0.5)
+                    
+            self.seried = {}
+            for legline, origline in zip(leg.get_lines(), handt+handles2):
+                legline.set_picker(5)
+                self.seried[legline] = origline
+    
 
         self.canvas.draw()
         
