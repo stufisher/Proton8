@@ -607,9 +607,9 @@ class NewRefinement(wx.Dialog):
         
         self._refs_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._refs_sizer.Add(self._view_refs, 0, wx.EXPAND|wx.RIGHT, 5)
-        self._refs_sizer.Add(self._reflections, 0, wx.EXPAND|wx.GROW)
+        self._refs_sizer.Add(self._reflections, 1, wx.EXPAND)
         
-        self.input_sizer.Add(self._refs_sizer, 0, wx.EXPAND|wx.GROW)
+        self.input_sizer.Add(self._refs_sizer, 0, wx.EXPAND)
 
         self.input_sizer.Add(wx.StaticText(self, -1, 'Structure'))
         self._structure = wx.ComboBox(self, -1, choices=inputs, style=wx.CB_READONLY)
@@ -619,7 +619,7 @@ class NewRefinement(wx.Dialog):
         
         self._struct_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._struct_sizer.Add(self._view_struct, 0, wx.EXPAND|wx.RIGHT, 5)
-        self._struct_sizer.Add(self._structure, 0, wx.EXPAND)
+        self._struct_sizer.Add(self._structure, 1, wx.EXPAND)
         
         self.input_sizer.Add(self._struct_sizer, 0, wx.EXPAND)
 
@@ -753,9 +753,11 @@ class NewRefinement(wx.Dialog):
             #self._bloc.Show()
             self._rfree.Show()
             self._target.SetSelection(1)
+            self._target.Disable()
         else:
             self._cycles.SetValue(10)
             self._target.SetSelection(0)
+            self._target.Enable()
             #self._bloc.Hide()
             self._rfree.Hide()
         
@@ -950,7 +952,10 @@ class Summary(wx.Frame):
         
             if 'custom_text' in p['options']:
                 if p['options']['custom_text']:
-                    cust += "\n" + p['options']['custom_text']
+                    if cust:
+                        cust += "\n"
+                    cust += p['options']['custom_text']
+                    
         
             if not cust:
                 cust = 'N/A'
