@@ -9,7 +9,7 @@ class ErrorHandler:
         self._parent = parent
         
     def _create_dialog(self):
-        if self._dialog is None:
+        if not self._dialog:
             self._dialog = ErrorDialog(self._parent)
             self._dialog.Show()
             self._dialog.SetFocus()      
@@ -21,13 +21,13 @@ class ErrorHandler:
 
 class ErrorDialog(wx.Dialog):
     def __init__(self, parent):
-        wx.Dialog.__init__(self, parent, 0, 'Proton8 Python Error', size=(350,400))
+        wx.Dialog.__init__(self, parent, 0, 'Proton8 Python Error', size=(500,400))
         self.Bind(wx.EVT_CLOSE, self._on_close)
         
         self._text = ''
         
-        self.label = wx.StaticText(self, -1, 'Proton8 seems to have encountered an error, press send to email this log to the developer', size=(350,50))
-        self.text = wx.TextCtrl(self, -1, size=(350, 300), style=wx.TE_MULTILINE)
+        self.label = wx.StaticText(self, -1, 'Proton8 seems to have encountered an error, press send to email this log to the developer', size=(350,30))
+        self.text = wx.TextCtrl(self, -1, size=(500, 300), style=wx.TE_MULTILINE)
         self.text.SetFont(wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL))
         
         send = wx.Button(self, 0, 'Send Report')
@@ -41,9 +41,9 @@ class ErrorDialog(wx.Dialog):
         self.button_sizer.Add(close)
         
         self.main = wx.BoxSizer(wx.VERTICAL)
-        self.main.Add(self.label)
-        self.main.Add(self.text)
-        self.main.Add(self.button_sizer)
+        self.main.Add(self.label, 0, wx.EXPAND|wx.ALL, 5)
+        self.main.Add(self.text, 0, wx.EXPAND|wx.ALL, 5)
+        self.main.Add(self.button_sizer, 0, wx.EXPAND|wx.ALL, 5)
         
         self.SetSizer(self.main)
         
