@@ -44,7 +44,7 @@ class Validation(Tab, scrolled.ScrolledPanel):
         self._chain_lookup = PDBTools().get_chains(self._pdb_file)
         
         r = clashscore()
-        self._clash_score, self._clashes = clashscore.analyze_clashes(r,pdb_io, verbose=True)
+        self._clash_score, self._clashes = clashscore.analyze_clashes(r,pdb_io)# verbose=True)
         self._clashes = self._clashes[''].split('\n')
         
         rama = ramalyze()
