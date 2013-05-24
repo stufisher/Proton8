@@ -237,6 +237,7 @@ class Process(Tab):
         self.canvas = FigCanvas(self, -1, self.fig)
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_position([0.115,0.17,0.80,0.79])
+        [i.set_linewidth(0.5) for i in self.ax1.spines.itervalues()]
         self.ax2 = self.ax1.twinx()
         self.ax2.set_position([0.115,0.17,0.80,0.79])
         self._clear_figure()
