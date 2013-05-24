@@ -30,6 +30,7 @@ from Error import ErrorHandler
 from Tab import Tab
 from Settings import Settings
 from Controls import FileBrowser
+from Ligand import Ligand
 
 #from Shelx import PDBImporter
 
@@ -50,10 +51,13 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self._on_close)
         
         self.toolbar = wx.ToolBar(self, style=wx.TB_3DBUTTONS|wx.TB_TEXT)
-        quit = self.toolbar.AddLabelTool(wx.ID_ANY, 'Quit', wxtbx.bitmaps.fetch_icon_bitmap("actions", "exit"))
-        settings = self.toolbar.AddLabelTool(wx.ID_ANY, 'Settings', wxtbx.bitmaps.fetch_icon_bitmap("actions", "configure"))
-        about = self.toolbar.AddLabelTool(wx.ID_ANY, 'About', wxtbx.bitmaps.fetch_icon_bitmap("actions", "info"))
+        quit = self.toolbar.AddLabelTool(wx.ID_ANY, 'Quit', wxtbx.bitmaps.fetch_icon_bitmap('actionn', 'exit'))
+        settings = self.toolbar.AddLabelTool(wx.ID_ANY, 'Settings', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'configure'))
+        about = self.toolbar.AddLabelTool(wx.ID_ANY, 'About', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'info'))
+        self.toolbar.AddSeparator()
         coot = self.toolbar.AddLabelTool(wx.ID_ANY, 'Start Coot', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/coot.png'))
+        self.toolbar.AddSeparator()
+        ligand = self.toolbar.AddLabelTool(wx.ID_ANY, 'View Ligand', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/ligand_32.png'))
         self.SetToolBar(self.toolbar)
         self.toolbar.Realize()
         
@@ -61,6 +65,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.start_coot, coot)
         self.Bind(wx.EVT_TOOL, self._show_settings, settings)
         self.Bind(wx.EVT_TOOL, self._show_about, about)
+        self.Bind(wx.EVT_TOOL, self._view_ligand, ligand)
         
         self._coot_timer = None
         self._coot_process = None
@@ -83,9 +88,9 @@ class MainFrame(wx.Frame):
         Jobs.set_load_refinement(self.sheet2.load_refinement)
         Jobs.set_auto_refinement(self.sheet2.auto_refinement)
 
-        nb.AddPage(self.sheet1, "Manage")
-        nb.AddPage(self.sheet2, "Process")
-        nb.AddPage(self.sheet3, "Compare")
+        nb.AddPage(self.sheet1, 'Manage')
+        nb.AddPage(self.sheet2, 'Process')
+        nb.AddPage(self.sheet3, 'Compare')
 
         self.sb = self.CreateStatusBar()
         self.sb.SetFieldsCount(2)
@@ -96,7 +101,16 @@ class MainFrame(wx.Frame):
         self.sheet1.refresh_tabs()
         
         #self.sheet1.sheet2._test()
-        
+    
+    def _view_ligand(self, event):
+        dlg = wx.FileDialog(self, 'Select a PDB file to load', defaultDir=os.getcwd(), wildcard='PDB File|*.pdb')
+    
+        if dlg.ShowModal() == wx.ID_OK:
+            lig = Ligand(str(dlg.GetPath()), str(dlg.GetPath()))
+            lig.Show(True)
+
+        dlg.Destroy()
+    
     
     def _show_settings(self, event):
         dlg = SettingsDialog(self)
@@ -148,7 +162,7 @@ class MainFrame(wx.Frame):
 # ----------------------------------------------------------------------------
 # Proton8 App
 class Proton8(wx.App):
-    #outputWindowClass = ErrorHandler
+    outputWindowClass = ErrorHandler
     
     def OnInit(self):
          frame = MainFrame(None, -1, 'Proton8')
@@ -181,7 +195,7 @@ probe
 
 Thanks
 ------
-Nat Echols -"""
+Nat Echols"""
             
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
