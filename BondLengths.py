@@ -49,6 +49,8 @@ class BondLengths(Tab):
         
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_position([0.10,0.153,0.80,0.81])
+        #self.ax1.set_frame_on(False)
+        [i.set_linewidth(0.5) for i in self.ax1.spines.itervalues()]
         self.ax2 = self.ax1.twinx()
         self.ax2.set_position([0.10,0.153,0.80,0.81])
         self.ax1.tick_params(labelsize=8)
