@@ -51,12 +51,11 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self._on_close)
         
         self.toolbar = wx.ToolBar(self, style=wx.TB_3DBUTTONS|wx.TB_TEXT)
-        quit = self.toolbar.AddLabelTool(wx.ID_ANY, 'Quit', wxtbx.bitmaps.fetch_icon_bitmap('actionn', 'exit'))
+        quit = self.toolbar.AddLabelTool(wx.ID_ANY, 'Quit', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'exit'))
         settings = self.toolbar.AddLabelTool(wx.ID_ANY, 'Settings', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'configure'))
         about = self.toolbar.AddLabelTool(wx.ID_ANY, 'About', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'info'))
         self.toolbar.AddSeparator()
         coot = self.toolbar.AddLabelTool(wx.ID_ANY, 'Start Coot', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/coot.png'))
-        self.toolbar.AddSeparator()
         ligand = self.toolbar.AddLabelTool(wx.ID_ANY, 'View Ligand', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/ligand_32.png'))
         self.SetToolBar(self.toolbar)
         self.toolbar.Realize()
