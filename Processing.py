@@ -565,13 +565,13 @@ class Holder(Tab):
             
     def load_analysis(self, ref):
         self._tab_list.append(Validation(self))
-        self._tab_list[-1].load_refinement(ref)
+        #self._tab_list[-1].load_refinement(ref)
         self._tabs.AddPage(self._tab_list[-1], 'Validation')
 
-        Compare.set_stats(self._tab_list[-1].stats)
+        #Compare.set_stats(self._tab_list[-1].stats)
         
         self._tab_list.append(Compare(self))
-        self._tab_list[-1].load_refinement(ref, self._stats.parameters())
+        #self._tab_list[-1].load_refinement(ref, self._stats.parameters())
         self._tabs.AddPage(self._tab_list[-1], 'Compare')
     
         self._tab_list.append(BondLengths(self))
@@ -579,6 +579,12 @@ class Holder(Tab):
         self._tabs.AddPage(self._tab_list[-1], 'Bond Lengths')
     
 
+        self._tab_list[0].set_residues(self._tab_list[2].residues())
+        self._tab_list[0].load_refinement(ref)
+        Compare.set_stats(self._tab_list[0].stats)
+        
+        self._tab_list[1].load_refinement(ref, self._stats.parameters())
+    
     def load_coot(self):
         self._stats.load_coot()
 

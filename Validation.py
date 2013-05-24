@@ -30,6 +30,9 @@ class Validation(Tab, scrolled.ScrolledPanel):
         self._rmsds = [-1,-1]
         self._chain_lookup = {}
     
+    def set_residues(self, residues):
+        self._residues = residues
+    
     def stats(self):
         return self._clash_score[''], self._rmsds
     
@@ -61,14 +64,25 @@ class Validation(Tab, scrolled.ScrolledPanel):
         self._rmsds = lst.get_stats()
         
         # Summary
-        self.stats_sizer = wx.FlexGridSizer(cols=3, rows=7, vgap=5, hgap=5)
+        self.stats_sizer = wx.FlexGridSizer(cols=3, rows=0, vgap=5, hgap=5)
         self.stats_sizer.Add(wx.StaticText(self, -1, 'RMSD Bonds'))
         self.stats_sizer.Add(wx.StaticText(self, -1, '%.3f' % (self._rmsds[0])))
         self.stats_sizer.Add(wx.StaticText(self, -1, ''))
         self.stats_sizer.Add(wx.StaticText(self, -1, 'RMSD Angles'))
         self.stats_sizer.Add(wx.StaticText(self, -1, '%.3f' % (self._rmsds[1])))
         self.stats_sizer.Add(wx.StaticText(self, -1, ''), 0, wx.EXPAND|wx.BOTTOM, 10)
-                             
+
+        self.stats_sizer.Add(wx.StaticText(self, -1, 'B Factor (Protein)'))
+        self.stats_sizer.Add(wx.StaticText(self, -1, '%.2f' % (self._residues['avg']['pro'])))
+        self.stats_sizer.Add(wx.StaticText(self, -1, ''), 0, wx.EXPAND|wx.BOTTOM)
+        self.stats_sizer.Add(wx.StaticText(self, -1, 'B Factor (Solvent)'))
+        self.stats_sizer.Add(wx.StaticText(self, -1, '%.2f' % (self._residues['avg']['sol'])))
+        self.stats_sizer.Add(wx.StaticText(self, -1, ''), 0, wx.EXPAND|wx.BOTTOM)
+        self.stats_sizer.Add(wx.StaticText(self, -1, 'B Factor (All)'))
+        self.stats_sizer.Add(wx.StaticText(self, -1, '%.2f' % (self._residues['avg']['all'])))
+        self.stats_sizer.Add(wx.StaticText(self, -1, ''), 0, wx.EXPAND|wx.BOTTOM, 10)
+        
+        
         self.stats_sizer.Add(wx.StaticText(self, -1, 'Ramachandran Outliers'))
         self.stats_sizer.Add(wx.StaticText(self, -1, '%.1f' % (rama.get_outliers_count_and_fraction()[1]*100) + '%'))
         self.stats_sizer.Add(wx.StaticText(self, -1, '(Goal ' + rama.get_outliers_goal()+')'))

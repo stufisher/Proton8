@@ -111,9 +111,9 @@ class BondLengths(Tab):
         self.ressel_sizer.Add(self.omitted_sizer, 1, wx.EXPAND|wx.ALL, 5)
         self.ressel_sizer.Add(self.selected_sizer, 1, wx.EXPAND|wx.ALL, 5)
         
-        lig = metallicbutton.MetallicButton(self, -1, 'Ligands', '', bitmaps.fetch_icon_bitmap("actions", "viewmag", scale=(16,16)), size=(75, 25))
-        save = metallicbutton.MetallicButton(self, -1, 'Figure', '', bitmaps.fetch_icon_bitmap("actions", "save_all", scale=(16,16)), size=(65, 25))
-        tab = metallicbutton.MetallicButton(self, -1, 'Data', '', bitmaps.fetch_icon_bitmap("actions", "save_all", scale=(16,16)), size=(65, 25))
+        lig = metallicbutton.MetallicButton(self, -1, 'Ligands', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(75, 25))
+        save = metallicbutton.MetallicButton(self, -1, 'Figure', '', bitmaps.fetch_icon_bitmap('actions', 'save_all', scale=(16,16)), size=(65, 25))
+        tab = metallicbutton.MetallicButton(self, -1, 'Data', '', bitmaps.fetch_icon_bitmap('actions', 'save_all', scale=(16,16)), size=(65, 25))
         self.Bind(wx.EVT_BUTTON, self._view_ligands, lig)
         self.Bind(wx.EVT_BUTTON, self._save_figure, save)
         self.Bind(wx.EVT_BUTTON, self._save_data, tab)
@@ -148,6 +148,10 @@ class BondLengths(Tab):
         
         self.canvas.mpl_connect('button_press_event', self._on_click)
         self.canvas.mpl_connect('pick_event', self._show_series)
+    
+    
+    def residues(self):
+        return self._residues
     
     def _save_data(self, e):
         dlg = wx.FileDialog(self, "Save Data as CSV", os.getcwd(), "", "*.csv", wx.SAVE)
@@ -426,6 +430,8 @@ class BondLengths(Tab):
             
             if len(std_arr) > 0:
                 self._residues['avg'][type] = sum(std_arr)/len(std_arr)
+            else:
+                self._residues['avg'][type] = 0
         
         self._update_lists()
         self._show_residue()
@@ -471,7 +477,7 @@ class BondLengths(Tab):
         
         self.series = []
     
-        self.ax2.set_ylabel('$B Factor (\AA^2)$', fontsize=9)  
+        self.ax2.set_ylabel('B Factor $(\AA^2)$', fontsize=9)
 
         t  = self._rtypess[self._residue_type].lower()
         tu = self._rtypess[self._residue_type]
@@ -510,7 +516,7 @@ class BondLengths(Tab):
                 self.ax1.axhspan(1.327, 1.293, alpha=0.6, color='0.9')
                 self.ax1.axhspan(1.194, 1.226, alpha=0.6, color='0.9')
                 self.ax1.set_ylim(min(l1+l2+[1.2])-0.2, max(l1+l2+[1.32])+0.05)
-                self.ax1.set_ylabel('C-O (A)', fontsize=9)
+                self.ax1.set_ylabel('C-O $(\AA)$', fontsize=9)
             
                 self._to_save = [['Residue', 'C-OD1', 'ESDS(C-OD1)', 'B(C-OD1)', 'C-OD2', 'ESDS(C-OD2)', 'B(C-OD2)', 'D(C-O)', 'S(D(C-O)', 'Level']]
                 for i,k in enumerate(x):
@@ -565,7 +571,7 @@ class BondLengths(Tab):
                 self.ax1.axhline(y=107.5, color='0.7')
                 self.ax1.axhline(y=107.2, color='0.7')
                 self.ax1.set_ylim(95, 115)
-                self.ax1.set_ylabel('Angle ($^\circ$)', fontsize=9)
+                self.ax1.set_ylabel('Angle $(^\circ)$', fontsize=9)
             
                 angles = ['CG-CD2-NE2', 'ND1-CE1-NE2', 'CD2-NE2-CE1', 'CE1-ND1-CG', 'CD2-CG-ND1']
                 cols = [ [ n, 'ESDS('+n+')', 'B('+n+')'] for n in angles ]
@@ -598,7 +604,7 @@ class BondLengths(Tab):
                 self.ax2.plot(xa, b2, '^', label='B(CZ-NE)', color='#FF6666')
                 self.ax2.plot(xa, b3, '^', label='B(CZ-NH1)', color='#99FF99')
                 self.ax1.set_ylim(min(l1+l2)-0.2, max(l1+l2)+0.05)
-                self.ax1.set_ylabel('CZ-X (A)', fontsize=9)
+                self.ax1.set_ylabel('CZ-X $(\AA)$', fontsize=9)
                 self.ax1.axhline(y=1.326, color='0.7')
                 self.ax1.axhline(y=1.41, color='0.7')
 
@@ -613,12 +619,12 @@ class BondLengths(Tab):
                         self._to_save.append([k, l1[i], el1[i], b1[i], l2[i], el2[i], b2[i], l3[i], el3[i], b3[i], diff, sig, diff/sig])
 
             if sum(el1) == 0 and sum(el2) == 0:
-                txt = 'Average B factor: %.1f' % (self._residues['avg']['b'])
+                txt = 'Average B factor: %.1f' % (self._residues['avg']['pro'])
             else:
-                txt = 'Average B factor: %.1f, Average sigma: %.3f' % (self._residues['avg']['b'],sum(el1+el2)/(len(el1)+len(el2)))
+                txt = 'Average B factor: %.1f, Average sigma: %.3f' % (self._residues['avg']['pro'],sum(el1+el2)/(len(el1)+len(el2)))
             
             self.averages.SetLabel(txt)
-            self.ax2.axhline(y=self._residues['avg']['b'], color=(0.5,0.5,0), ls='--')
+            self.ax2.axhline(y=self._residues['avg']['pro'], color=(0.5,0.5,0), ls='--')
             self.ax2.set_ylim(min(b1+b2)-2, max(b1+b2)+20)
     
             self.ax2.set_xlim(-1, len(x))
