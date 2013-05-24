@@ -9,15 +9,20 @@ class PDBTools:
         self._omitted = {'asp': [], 'glu': [], 'his': [], 'arg': []}
         self._residues = {'asp': {}, 'glu': {}, 'his': {}, 'arg': {}}
 
-        b_avg_array = []
+        b_avg_array = [[],[],[]]
         rlist = {'asp': {}, 'glu': {}, 'his': {}, 'arg': {}}
         t = {'ASP': [' CG ', ' OD1', ' OD2'], 'GLU': [' CD ', ' OE1', ' OE2']} 
         pdb = iotbx.pdb.input(file_name=pdb_file)
         for a in pdb.atoms_with_labels():
+            b_avg_array[2].append(a.b)
+                    
+            if a.resname in ['HOH', 'DOD']:
+                b_avg_array[1].append(a.b)
+            
             if a.resname in ['ASP', 'ALA', 'HIS', 'ARG', 'LYS', 'GLN', 'GLU', 
                             'TYR', 'PRO', 'LEU', 'ILE', 'MET', 'VAL', 'SER',
                             'ASN', 'CYS', 'GLY', 'TRP', 'PHE', 'THR', 'LYS']:
-                b_avg_array.append(a.b)
+                b_avg_array[0].append(a.b)
         
             rid = int(a.resid())
             if a.resname in t.keys():
@@ -88,7 +93,15 @@ class PDBTools:
                     if len(res) == 4:
                         self._residues[t][rid] = {1: [res[0].distance(res[1]), res[1].occ, res[1].b], 2: [res[0].distance(res[2]), res[2].occ, res[2].b], 3: [res[0].distance(res[3]), res[3].occ, res[3].b]}
 
-        self._residues['avg'] = {'b': (sum(b_avg_array)/len(b_avg_array))}
+        self._residues['avg'] = {}
+        for i,k in enumerate(['pro', 'sol', 'all']):
+            if len(b_avg_array[i]) > 0:
+                val = sum(b_avg_array[i])/len(b_avg_array[i])
+            else:
+                val = 0;
+            self._residues['avg'][k] = val
+
+        #self._residues['avg'] = {'b': (sum(b_avg_array)/len(b_avg_array))}
             
         return self._omitted, self._residues
 
@@ -114,3 +127,4 @@ class PDBTools:
             _last = r
         
         return res_lookup
+
