@@ -21,7 +21,7 @@ class Ligand(wx.Frame):
     def __init__(self, pdb_file='test/3HLX.pdb', name='', *args, **kwargs):
         wx.Frame.__init__(self,None,-1,'Ligand Explorer: ' + name, size=(500,300))
         
-        self.fig = Figure((7.0, 5.0), dpi=100)
+        self.fig = Figure((5.0, 5.0), dpi=100)
         self.canvas = FigureCanvasWxAgg(self, -1, self.fig)
         
         if os.path.exists(pdb_file):
@@ -30,7 +30,7 @@ class Ligand(wx.Frame):
             self.Destroy()
             
         
-        cols = {'C': 'black', 'O': 'red', 'N': 'blue', 'S': 'green'}
+        cols = {'C': 'black', 'O': 'red', 'N': 'blue', 'S': 'green', 'H': 'white'}
 
         self._refresh = False
         self._labs = []
@@ -142,7 +142,7 @@ class Ligand(wx.Frame):
         self.refresh()
             
     def _save_figure(self, e):
-        dlg = wx.FileDialog(self, "Save Image", os.getcwd(), "", "*.png", wx.SAVE)
+        dlg = wx.FileDialog(self, 'Save Image', os.getcwd(), '', '*.png', wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.fig.savefig(path, dpi=300, transparent=True)
@@ -153,6 +153,7 @@ class Ligand(wx.Frame):
         r = self._ligands[self.res_type.GetValue()]
         
         self.ax1.cla()
+        self.ax1.mouse_init()
         self.ax1.w_xaxis.set_major_locator(ticker.NullLocator())
         self.ax1.w_yaxis.set_major_locator(ticker.NullLocator())
         self.ax1.w_zaxis.set_major_locator(ticker.NullLocator())
@@ -166,13 +167,10 @@ class Ligand(wx.Frame):
         for i,ax in enumerate(['set_xlim', 'set_ylim', 'set_zlim']):
             mn = min(r['c'][:,i])
             mx = max(r['c'][:,i])
+            
+            mid = mn+((mx - mn)/2)
 
-            diff = 0
-            if m > mx-mn:
-                diff = m - (mx-mn)
-
-            getattr(self.ax1, ax)(mn-diff/2, mx+diff/2)
-        
+            getattr(self.ax1, ax)(mid-(m/2), mid+(m/2))
                 
         self._labs = []
         self._alabs = []
