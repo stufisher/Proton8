@@ -42,7 +42,7 @@ class MainFrame(wx.Frame):
     def __init__(self, parent, id, title):
         self._settings = Settings()
         
-        
+        CootClient.set_start_coot(self.start_coot)
         
         #PDBImporter('./test/3HLX.pdb', '.')
         #exit(1)
@@ -105,7 +105,7 @@ class MainFrame(wx.Frame):
         dlg = wx.FileDialog(self, 'Select a PDB file to load', defaultDir=os.getcwd(), wildcard='PDB File|*.pdb')
     
         if dlg.ShowModal() == wx.ID_OK:
-            lig = Ligand(str(dlg.GetPath()), str(dlg.GetPath()))
+            lig = Ligand(str(dlg.GetPath()), os.path.basename(str(dlg.GetPath())))
             lig.Show(True)
 
         dlg.Destroy()
@@ -125,7 +125,7 @@ class MainFrame(wx.Frame):
 
     def set_project(self, project):
         self._project = project
-        
+    
     def start_coot(self, event):
         print self._coot_process
         if self._coot_process is not None:
@@ -263,10 +263,16 @@ class CootClient:
     def set_p8(path):
         CootClient._p8p = path
     
+    @staticmethod
+    def set_start_coot(func):
+        CootClient._start_coot = func
+    
     def __init__(self):
         self._server = xmlrpclib.Server('http://localhost:41734')
 
     def __getattr__(self, name):
+        if self._start_coot is not None:
+            self._start_coot('')
         return _Method(self._server, name)
 
 
