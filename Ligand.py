@@ -21,7 +21,7 @@ class Ligand(wx.Frame):
     def __init__(self, pdb_file='test/3HLX.pdb', name='', *args, **kwargs):
         wx.Frame.__init__(self,None,-1,'Ligand Explorer: ' + name, size=(500,300))
         
-        self.fig = Figure((5.0, 5.0), dpi=100)
+        self.fig = Figure((6.0, 6.0), dpi=100)
         self.canvas = FigureCanvasWxAgg(self, -1, self.fig)
         
         if os.path.exists(pdb_file):
@@ -154,22 +154,20 @@ class Ligand(wx.Frame):
         
         self.ax1.cla()
         self.ax1.mouse_init()
-        self.ax1.w_xaxis.set_major_locator(ticker.NullLocator())
-        self.ax1.w_yaxis.set_major_locator(ticker.NullLocator())
-        self.ax1.w_zaxis.set_major_locator(ticker.NullLocator())
         self.ax1.set_frame_on(False)
         self.ax1.set_axis_off()
+        
+        for a in (self.ax1.w_xaxis, self.ax1.w_yaxis, self.ax1.w_zaxis):
+            a.line.set_visible(False)
+            a.pane.set_visible(False)
+            a.set_major_locator(ticker.NullLocator())
         
         self.ax1.scatter3D(r['c'][:,0], r['c'][:,1], r['c'][:,2], c=r['col'], s=400)
         
         m = max([max(r['c'][:,i])-min(r['c'][:,i]) for i in range(3)])
 
         for i,ax in enumerate(['set_xlim', 'set_ylim', 'set_zlim']):
-            mn = min(r['c'][:,i])
-            mx = max(r['c'][:,i])
-            
-            mid = mn+((mx - mn)/2)
-
+            mid = min(r['c'][:,i])+((max(r['c'][:,i]) - min(r['c'][:,i]))/2)
             getattr(self.ax1, ax)(mid-(m/2), mid+(m/2))
                 
         self._labs = []
