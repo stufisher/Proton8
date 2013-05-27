@@ -33,7 +33,7 @@ class Project:
     
 
     def job_count(self, pm = None):
-        return len([name for name in os.listdir(self.root()) if os.path.isdir(name) and name.split('_')[0].isdigit()])
+        return len([name for name in os.listdir(self.root()) if os.path.isdir(self.root()+os.sep+name) and name.split('_')[0].isdigit()])
         
         if pm is None:
             return self._data['job_count']

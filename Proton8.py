@@ -2,6 +2,7 @@ import inspect
 
 import wx
 import wx.aui
+import wx.html
 import matplotlib
 matplotlib.use('WXAgg')
 
@@ -43,9 +44,8 @@ class MainFrame(wx.Frame):
         self._settings = Settings()
         
         CootClient.set_start_coot(self.start_coot)
-        
-        #PDBImporter('./test/3HLX.pdb', '.')
-        #exit(1)
+        SettingsDialog.set_settings(self._settings)
+        HelpDialog.set_settings(self._settings)
         
         wx.Frame.__init__(self, parent, id, title, size=(850,540))
         self.Bind(wx.EVT_CLOSE, self._on_close)
@@ -54,9 +54,10 @@ class MainFrame(wx.Frame):
         quit = self.toolbar.AddLabelTool(wx.ID_ANY, 'Quit', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'exit'))
         settings = self.toolbar.AddLabelTool(wx.ID_ANY, 'Settings', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'configure'))
         about = self.toolbar.AddLabelTool(wx.ID_ANY, 'About', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'info'))
+        help = self.toolbar.AddLabelTool(wx.ID_ANY, 'Help', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'agt_support'))
         self.toolbar.AddSeparator()
-        coot = self.toolbar.AddLabelTool(wx.ID_ANY, 'Start Coot', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/coot.png'))
-        ligand = self.toolbar.AddLabelTool(wx.ID_ANY, 'View Ligand', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/ligand_32.png'))
+        coot = self.toolbar.AddLabelTool(wx.ID_ANY, 'Coot', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/coot.png'))
+        ligand = self.toolbar.AddLabelTool(wx.ID_ANY, 'Ligands', wx.Bitmap(self._settings.proot + 'Resources/gui_resources/ligand_32.png'))
         self.SetToolBar(self.toolbar)
         self.toolbar.Realize()
         
@@ -64,6 +65,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.start_coot, coot)
         self.Bind(wx.EVT_TOOL, self._show_settings, settings)
         self.Bind(wx.EVT_TOOL, self._show_about, about)
+        self.Bind(wx.EVT_TOOL, self._show_help, help)
         self.Bind(wx.EVT_TOOL, self._view_ligand, ligand)
         
         self._coot_timer = None
@@ -119,7 +121,11 @@ class MainFrame(wx.Frame):
         dlg = AboutDialog(self)
         dlg.Show(True)
     
-        
+    
+    def _show_help(self, event):
+        dlg = HelpDialog(self)
+        dlg.Show(True)
+    
     def set_status(self, text, fld =0):
         self.sb.SetStatusText(text, fld)
 
@@ -253,6 +259,57 @@ class SettingsDialog(wx.Dialog):
     def _save(self, event):
         self.s.val('coot', self._coot.file())
         self.s.val('phenix', self._phenix.file())
+
+
+# ----------------------------------------------------------------------------
+# Help Dialog
+class HelpDialog(wx.Frame):
+    
+    @staticmethod
+    def set_settings(s):
+        HelpDialog.s = s
+    
+    
+    def __init__(self, parent):
+        wx.Frame.__init__(self, parent, -1, 'Help', size=(700,500))
+
+        self.toolbar = wx.ToolBar(self, style=wx.TB_3DBUTTONS|wx.TB_TEXT)
+        close = self.toolbar.AddLabelTool(wx.ID_ANY, 'Close', wxtbx.bitmaps.fetch_icon_bitmap('actions', 'no'))
+        self.toolbar.AddSeparator()
+        home = self.toolbar.AddLabelTool(wx.ID_ANY, 'Home', wxtbx.bitmaps.fetch_icon_bitmap('apps', 'home'))
+        back = self.toolbar.AddLabelTool(wx.ID_ANY, 'Back', wxtbx.bitmaps.fetch_icon_bitmap('actions', '1leftarrow'))
+        forward = self.toolbar.AddLabelTool(wx.ID_ANY, 'Forward', wxtbx.bitmaps.fetch_icon_bitmap('actions', '1rightarrow'))
+        
+        self.Bind(wx.EVT_TOOL, self._on_close, close)
+        self.Bind(wx.EVT_TOOL, self._home, home)
+        self.Bind(wx.EVT_TOOL, self._back, back)
+        self.Bind(wx.EVT_TOOL, self._forward, forward)
+        
+        
+        self.SetToolBar(self.toolbar)
+        self.toolbar.Realize()
+
+        self.html = wx.html.HtmlWindow(self)
+        self._home('')
+        
+    
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self.html, 1, wx.EXPAND)
+            
+        self.SetSizer(self.sizer)
+
+
+    def _on_close(self, event):
+        self.Destroy()
+
+    def _home(self, event):
+        self.html.LoadPage(self.s.proot + 'Resources/help/index.html')
+
+    def _back(self, event):
+        self.html.HistoryBack()
+
+    def _forward(self, event):
+        self.html.HistoryForward()
 
 
 # ----------------------------------------------------------------------------
