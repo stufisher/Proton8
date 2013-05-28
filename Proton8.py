@@ -6,6 +6,7 @@ import wx.html
 import matplotlib
 matplotlib.use('WXAgg')
 
+import os
 import subprocess
 import xmlrpclib
 
@@ -43,7 +44,6 @@ class MainFrame(wx.Frame):
         self._settings = Settings()
         
         if self._settings.val('phenix'):
-            import os
             import sys
                 
             p = self._settings.val('phenix')
@@ -236,11 +236,11 @@ class SettingsDialog(wx.Dialog):
         self.sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
 
         self.sizer.Add(wx.StaticText(self, -1, 'Coot Path'), 0, wx.EXPAND)
-        self._coot = FileBrowser(self, '', 'Select your COOT directory')
+        self._coot = FileBrowser(self, self.s.val('coot'), 'Select your COOT directory')
         self.sizer.Add(self._coot.sizer(), 0, wx.EXPAND)
             
         self.sizer.Add(wx.StaticText(self, -1, 'PHENIX Path'), 0, wx.EXPAND)
-        self._phenix = FileBrowser(self, '', 'Select your PHENIX directory', dir=True)
+        self._phenix = FileBrowser(self, self.s.val('phenix'), 'Select your PHENIX directory', dir=True)
         self.sizer.Add(self._phenix.sizer(), 0, wx.EXPAND)
         
         self._ok = wx.Button(self, -1, 'Save')
