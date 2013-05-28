@@ -188,7 +188,7 @@ class Jobs(Tab):
         
             if p.finished():
                 self.set_status('PDB file sucessfully imported')
-                wx.MessageBox('Model file successfully imported', 'Sucesss', style=wx.OK | wx.CENTRE)
+                wx.MessageBox('Model file successfully imported', 'Sucess', style=wx.OK | wx.CENTRE)
         
         dlg.Destroy()
 
@@ -204,7 +204,7 @@ class Jobs(Tab):
 
                 if c.finished():
                     self.set_status('Reflection file successfully imported')
-                    wx.MessageBox('Reflection file successfully imported', 'Sucesss', style=wx.OK | wx.CENTRE)
+                    wx.MessageBox('Reflection file successfully imported', 'Sucess', style=wx.OK | wx.CENTRE)
             
         dlg.Destroy()
 
@@ -487,6 +487,7 @@ class Retrieve(wx.Dialog):
             
         self._set_status(8, 'Finished')
         self._close('')
+        wx.MessageBox('Input files successfully generated for ' + pdb, 'Sucess', style=wx.OK | wx.CENTRE)
         
     
     def _close(self, event):
@@ -539,7 +540,7 @@ class NewCIF(wx.Dialog):
         self.EndModal(1)
         
     def get_values(self):
-        return self._browser.file(), self._inputs[3].GetValue(), self._inputs[5].GetValue()
+        return self._browse.file(), self._inputs[3].GetValue(), self._inputs[5].GetValue()
 
     def _refresh(self):
             m = reflection_file_reader.any_reflection_file(self._browse.file())
