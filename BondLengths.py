@@ -16,7 +16,7 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
 
 from Project import Project
 from Tab import Tab
-from Ligand import Ligand
+from LigandGL import Ligand
 from Constants import *
 from PDBTools import PDBTools
 
