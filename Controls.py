@@ -15,6 +15,10 @@ class FileBrowser:
         if 'callback' in kwargs:
             self._callback = kwargs['callback']
     
+        val = ''
+        if 'val' in kwargs:
+            val = kwargs['val']
+        
     
         self._parent = parent
         self._mask = mask
@@ -22,7 +26,7 @@ class FileBrowser:
         
         self._browse = wx.Button(parent, -1, 'Browse')#, size=(50,25))
         self._browse.Bind(wx.EVT_BUTTON, self._get_file)
-        self._file = wx.TextCtrl(parent, -1)#, size=(250,25))
+        self._file = wx.TextCtrl(parent, -1, val)#, size=(250,25))
         
         self._browse_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._browse_sizer.Add(self._file, 3, wx.EXPAND)
