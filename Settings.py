@@ -8,7 +8,7 @@ from Project import Project
 
 class Settings:
     def __init__(self):
-        self._settings = { 'project_roots': [], 'current_root': None }
+        self._settings = { 'project_roots': [], 'current_root': None, 'phenix': '', 'coot': '' }
         self._root = os.path.expanduser('~/.proton8')
 
         os.environ['PATH'] = os.environ['PATH'] + ':' + os.getcwd() + '/Resources'
@@ -42,6 +42,9 @@ class Settings:
             file = open(self._root + '/settings.json')
             self._settings = json.load(file)
             file.close()
+        else:
+            self._save()
+
           
     @property
     def projects(self):
@@ -61,13 +64,13 @@ class Settings:
         if root != self.current:
             if os.path.exists(root + os.sep + '.proton8' + os.sep + 'project.json'):
                 Tab._project = Project(root, cwd=True)
-                self._settings['current_root'] = root
+                self.current = root
 
                 print os.getcwd()
     
     @save
     def add_project(self, root, title):
-        if not root in self.projects:
+        if not (root in self.projects and os.path.exists(root+'/.proton8/project.json')):
             upd = False
             if os.path.exists(root + os.sep + '.proton8' + os.sep + 'project.json'):
                 ret = wx.MessageBox('The selected folder looks like an existing Proton8 project. Do you wish to import it?', 'Project Exists', style=wx.YES_NO | wx.CENTRE)
@@ -77,12 +80,13 @@ class Settings:
                     Tab._project = Project(root)
                     upd = True
             else:
-                Tab._project = Project(root,title)
+                Tab._project = Project(root,title,cwd=True)
                 upd = True
                 
             if upd:
-                self.projects.append(root)
-                self._settings['current_root'] = root
+                if not root in self.projects:
+                    self.projects.append(root)
+                self.current = root
             
     @save
     def del_project(self, root):

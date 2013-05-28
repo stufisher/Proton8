@@ -283,11 +283,13 @@ class Projects(Tab):
     def retrieve(self):
         print self.s.current
         if self.s.current is not None:
-            if os.path.exists(self.s.current):
+            if os.path.exists(self.s.current) and os.path.exists(self.s.current + '/.proton8'):
                 #Tab._project = pickle.load(open(self.s.current + '/.proton8/project.pkl', 'rb'))
                 Tab._project = Project(self.s.current, cwd=True)
                 self._update_sb('Project: ' + Tab._project.title(), 1)
             else:
+                self.s.current = None
+                self.s.del_project(self.s.current)
                 self._update_sb('Project: None', 1)
                 self.refresh()
         else:
@@ -316,14 +318,10 @@ class Projects(Tab):
         if sel < len(self.s.projects):
             self.s.load_project(self.s.projects[sel])
             self.refresh_tabs()
-            self._update_sb('Project: ' + Tab._project.title(), 1)
         
     def refresh(self):
-        print 'refreshing project list...'
-            
         self.project_list.DeleteAllItems()
        
-        
         i = 0
         for r in self.s.projects:
             if os.path.exists(r + '/.proton8/project.json'):
@@ -337,6 +335,8 @@ class Projects(Tab):
                 if self.s.current == r:
                     self.project_list.SetItemImage(i, 0)
                 i +=1
+
+        self._update_sb('Project: ' + Tab._project.title() if Tab._project else 'None', 1)
 
 
 class NewProject(wx.Dialog):
