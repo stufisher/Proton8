@@ -186,7 +186,7 @@ class Validation(Tab, scrolled.ScrolledPanel):
                 cb_list.SetStringItem(i, 3, '%.3f' % dev)
                 cb_list.SetStringItem(i, 4, '%.2f' % diheral)
 
-            self.cb_sizer.Add(wx.StaticText(self, -1, '%d C-beta outliers found' % i), 0)
+            self.cb_sizer.Add(wx.StaticText(self, -1, '%d C-beta outliers found' % len(self._cb_data)), 0)
             self.cb_sizer.Add(cb_list, 1, wx.EXPAND|wx.ALL, 5)
             self.cb_list = cb_list
         else:
