@@ -7,7 +7,7 @@ import re
 from operator import itemgetter
 from itertools import groupby
 
-from iotbx import pdb, reflection_file_reader
+from iotbx import pdb, cif, reflection_file_reader
 from iotbx.shelx.write_ins import LATT_SYMM
 from mmtbx.monomer_library import server
 
