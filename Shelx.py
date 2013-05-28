@@ -245,7 +245,6 @@ class PDBImporter:
                             
             
             residues = []
-            atc = {}
             s = {'ZSOLV':{}}
             for a in atoms:
                 # phenix and shelx hydrogen naming conventions are not compatible
@@ -279,20 +278,27 @@ class PDBImporter:
                     to_rem.append(c)
                 for r in s[c]:
                     confs = s[c][r].keys()
-                    
-                    for a in s[c][r][confs[0]]:
-                        if not a.element in atc:
-                            atc[a.element] = 0
-                            
-                        atc[a.element] += 1
                         
                     if c.startswith('ZZ'):
                         s['ZSOLV'][id] = s[c][r]
                         id += 1
             
-            # work this out later...
-            #atc[' H'] = atc[' C'] * 3
-            
+                            
+            hierarcy = self._pdbf.construct_hierarchy()
+            counts = hierarcy.overall_counts()
+            atc = {}
+            for k,v in counts.element_charge_types.iteritems():
+                j = k.strip()
+                
+                if j == 'H' or j == 'D':
+                    continue
+                atc[j] = v
+                            
+            # Nasty hack, need a better way to estimate the number of hydrogens...
+            if not 'H' in atc:
+                atc['H'] = atc['C'] * 2
+                            
+                            
             for to_r in to_rem:
                 del s[to_r]
 
@@ -401,12 +407,13 @@ class PDBImporter:
                             a.occ += op
                             #else:
                             #    a.occ = (a.occ+op)*-1
-                        
+                    
+                            el_id = atc.keys().index(a.element.strip())+1
                             if a.uij_is_defined():
-                                print >> o, "%-6s%3d % 8.6f % 8.6f % 8.6f % 8.5f  % 7.5f =" % (a.name.strip(), atc.keys().index(a.element)+1, a.xyz[0]/cell[0], a.xyz[1]/cell[1], a.xyz[2]/cell[2], a.occ, a.uij[0])
+                                print >> o, "%-6s%3d % 8.6f % 8.6f % 8.6f % 8.5f  % 7.5f =" % (a.name.strip(), el_id, a.xyz[0]/cell[0], a.xyz[1]/cell[1], a.xyz[2]/cell[2], a.occ, a.uij[0])
                                 print >> o, "       % 7.5f  % 7.5f  % 7.5f  % 7.5f  % 7.5f" % (a.uij[1], a.uij[2], a.uij[5], a.uij[4], a.uij[3])
                             else:
-                                print >> o, "%-6s%3d % 8.6f % 8.6f % 8.6f % 8.5f  %8.5f" % (a.name.strip(), 1, a.xyz[0]/cell[0], a.xyz[1]/cell[1], a.xyz[2]/cell[2], a.occ, a.b/(8*pow(math.pi,2)))
+                                print >> o, "%-6s%3d % 8.6f % 8.6f % 8.6f % 8.5f  %8.5f" % (a.name.strip(), el_id, a.xyz[0]/cell[0], a.xyz[1]/cell[1], a.xyz[2]/cell[2], a.occ, a.b/(8*pow(math.pi,2)))
 
                     if len(alts) > 1:
                         print >> o, "PART   0"
