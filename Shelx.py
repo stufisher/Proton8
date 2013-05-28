@@ -108,8 +108,7 @@ class Shelx:
         residues = []
         if 'residues' in kwargs:
             residues = kwargs['residues']
-                
-        print enable
+        
         rests = {'ASP': ['DFIX_ASP 1.249 CG OD1','DFIX_ASP 1.249 CG OD2'],
                  'GLU': ['DFIX_GLU 1.249 CD OE1','DFIX_GLU 1.249 CD OE2'],
                  
@@ -420,8 +419,6 @@ class PDBImporter:
 
             print >> o, '\nHKLF 4'
             print >> o, 'END'
-                
-            print 'conf ids written: ' + str(conf_id)
             
             o.close()
 
