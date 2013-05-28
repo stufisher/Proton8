@@ -138,34 +138,35 @@ class Ligand(wx.Frame):
         dlg.Destroy()
     
     def _load_residue(self, event):
-        r = self._ligands[self.res_type.GetValue()]
-            
-        uij = []
-        bonds = []
-        labels = []
-        blabels = []
-        for i,a in enumerate(r['at']):
-            ac = r['c'][i]
-            for j,b in enumerate(r['at']):
-                if a is not b:
-                    bc = r['c'][j]
-                    if a.distance(b) < 1.8:
-                        std = ''
-                        
-                        n = a.name.strip()+'-'+b.name.strip()
-                        if n in r['stdevs']:
-                            std = ' (' + str(r['stdevs'][n]) + ')'
-                        bonds.append([i,j])
-                        blabels.append('%.2f' % a.distance(b) + std)
-    
-            labels.append(a.name.strip())
-            if a.uij[0] == -1:
-                b = a.b/(8*pow(math.pi,2))
-                uij.append((b,b,b,0,0,0))
-            else:
-                uij.append(a.uij)
-    
-        self.viewer.load_residue(atoms=r['c'], colours=r['col'], bonds=bonds, labels=labels, blabels=blabels, uij=uij)
+        if len(self._ligands.keys()) > 0:
+            r = self._ligands[self.res_type.GetValue()]
+                
+            uij = []
+            bonds = []
+            labels = []
+            blabels = []
+            for i,a in enumerate(r['at']):
+                ac = r['c'][i]
+                for j,b in enumerate(r['at']):
+                    if a is not b:
+                        bc = r['c'][j]
+                        if a.distance(b) < 1.8:
+                            std = ''
+                            
+                            n = a.name.strip()+'-'+b.name.strip()
+                            if n in r['stdevs']:
+                                std = ' (' + str(r['stdevs'][n]) + ')'
+                            bonds.append([i,j])
+                            blabels.append('%.2f' % a.distance(b) + std)
+        
+                labels.append(a.name.strip())
+                if a.uij[0] == -1:
+                    b = a.b/(8*pow(math.pi,2))
+                    uij.append((b,b,b,0,0,0))
+                else:
+                    uij.append(a.uij)
+        
+            self.viewer.load_residue(atoms=r['c'], colours=r['col'], bonds=bonds, labels=labels, blabels=blabels, uij=uij)
 
 
 # ----------------------------------------------------------------------------
