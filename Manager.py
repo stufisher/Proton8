@@ -188,7 +188,7 @@ class Jobs(Tab):
         
             if p.finished():
                 self.set_status('PDB file sucessfully imported')
-                wx.MessageBox('Sucesss', 'Model file successfully imported', style=wx.OK | wx.CENTRE)
+                wx.MessageBox('Model file successfully imported', 'Sucesss', style=wx.OK | wx.CENTRE)
         
         dlg.Destroy()
 
@@ -204,7 +204,7 @@ class Jobs(Tab):
 
                 if c.finished():
                     self.set_status('Reflection file successfully imported')
-                    wx.MessageBox('Sucesss', 'Reflection file successfully imported', style=wx.OK | wx.CENTRE)
+                    wx.MessageBox('Reflection file successfully imported', 'Sucesss', style=wx.OK | wx.CENTRE)
             
         dlg.Destroy()
 
