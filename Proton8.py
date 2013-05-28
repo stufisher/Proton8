@@ -8,7 +8,6 @@ matplotlib.use('WXAgg')
 
 import subprocess
 import xmlrpclib
-import os
 
 #root = '/Applications/Proton8/Contents/Proton8/source'
 root = inspect.getfile(inspect.currentframe()).replace('Proton8.py', '')
@@ -31,7 +30,7 @@ from Error import ErrorHandler
 from Tab import Tab
 from Settings import Settings
 from Controls import FileBrowser
-from Ligand import Ligand
+from LigandGL import Ligand
 
 #from Shelx import PDBImporter
 
@@ -42,6 +41,17 @@ import wxtbx.bitmaps
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title):
         self._settings = Settings()
+        
+        if self._settings.val('phenix'):
+            import os
+            import sys
+                
+            p = self._settings.val('phenix')
+            base = p + '/Contents/' + os.path.basename(p).lower()
+            sys.path.append(base + '/elbow')
+            sys.path.append(base)
+            libtbx.env.add_repository(base)
+            libtbx.env.process_module(None, 'elbow', False)
         
         CootClient.set_start_coot(self.start_coot)
         SettingsDialog.set_settings(self._settings)
@@ -100,7 +110,6 @@ class MainFrame(wx.Frame):
 
         self.sheet1.load_project()
         self.sheet1.refresh_tabs()
-        
         #self.sheet1.sheet2._test()
     
     def _view_ligand(self, event):
@@ -259,6 +268,8 @@ class SettingsDialog(wx.Dialog):
     def _save(self, event):
         self.s.val('coot', self._coot.file())
         self.s.val('phenix', self._phenix.file())
+
+        self._on_close()
 
 
 # ----------------------------------------------------------------------------
