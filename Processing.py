@@ -439,15 +439,18 @@ class P8PolygonPanel(pgn.PolygonPanel):
 # ----------------------------------------------------------------------------
 # Polygon / Histogram Panel
 class Compare(Tab):
-    @staticmethod
-    def set_stats(func):
-        Compare._stats = func
+    #@staticmethod
+    #def set_stats(func):
+    #    Compare._stats = func
     
     def __init__(self, nb):
         Tab.__init__(self, nb)
         
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.SetSizer(self.sizer)
+    
+    def set_stats(self, func):
+        self._stats = func
     
     def load_refinement(self, ref, stats):
         pdb_file = ref.replace('.dat', '.pdb')
@@ -482,8 +485,10 @@ class Compare(Tab):
         self.pg_sizer.Add(self.histogram, 1, wx.ALL, 10)
         self.pg_sizer.Add(self.draw_color_key())
                 
-        self.sizer.Add(self.pg_sizer, 1)                
-        self.sizer.Add(self.polygon_panel, 2, wx.ALL, 10)
+        self.sizer.Add(self.pg_sizer, 1, wx.EXPAND)
+        self.sizer.Add(self.polygon_panel, 2, wx.EXPAND, wx.ALL, 10)
+    
+        self.sizer.Layout()
     
     def _on_click(self, qd):
         lkup = { 0:1, 1:3, 2:5, 3:0, 4:4, 5:2 }
@@ -582,7 +587,7 @@ class Holder(Tab):
 
         self._tab_list[0].set_residues(self._tab_list[2].residues())
         self._tab_list[0].load_refinement(ref)
-        Compare.set_stats(self._tab_list[0].stats)
+        self._tab_list[1].set_stats(self._tab_list[0].stats)
         
         self._tab_list[1].load_refinement(ref, self._stats.parameters())
     
