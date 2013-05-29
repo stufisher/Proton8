@@ -28,19 +28,19 @@ class CootFunctions:
         self._loaded_pbds = []
         self._loaded_maps = []
     
-    def load_refinement(self, base, lst=True):
+    def load_refinement(self, base, lst=False):
         self.close_maps()
         self.close_models()
     
         read_shelx_ins_file(base + '.res', 0)
         handle_shelx_fcf_file(base + '.fcf')
-        #if lst:
-        #read_shelx_lst_file(base + '.lst', 0)
+        if lst:
+            read_shelx_lst_file(base + '.lst', 0)
         
         return True
         
     def centre_residue(self, chain, id, atom):
-        #set_zoom_factor(21)    
+        #set_zoom_factor(21)
         set_go_to_atom_chain_residue_atom_name(chain, id, atom)
         
         return True
