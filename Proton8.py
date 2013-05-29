@@ -30,7 +30,7 @@ from Manager import Manager, Jobs
 from Error import ErrorHandler
 from Tab import Tab
 from Settings import Settings
-from Controls import FileBrowser
+from Controls import FileBrowser, ValidFileBrowser
 from LigandGL import Ligand
 
 #from Shelx import PDBImporter
@@ -48,10 +48,11 @@ class MainFrame(wx.Frame):
                 
             p = self._settings.val('phenix')
             base = p + '/Contents/' + os.path.basename(p).lower()
-            sys.path.append(base + '/elbow')
-            sys.path.append(base)
-            libtbx.env.add_repository(base)
-            libtbx.env.process_module(None, 'elbow', False)
+            if os.path.exists(base):
+                sys.path.append(base + '/elbow')
+                sys.path.append(base)
+                libtbx.env.add_repository(base)
+                libtbx.env.process_module(None, 'elbow', False)
         
         CootClient.set_start_coot(self.start_coot)
         SettingsDialog.set_settings(self._settings)
@@ -142,20 +143,23 @@ class MainFrame(wx.Frame):
         self._project = project
     
     def start_coot(self, event):
-        print self._coot_process
-        if self._coot_process is not None:
-            print self._coot_process.poll()
-        
-        if self._coot_process == None:
-            self._coot_timer = wx.Timer(self, 201)
-            wx.EVT_TIMER(self, 201, self.check_coot)
-            self._coot_timer.Start(250, False)
+        coot_exe = self._settings.val('coot') + '/Contents/MacOS/coot'
+        if os.path.exists(coot_exe):
+            if self._coot_process is not None:
+                print self._coot_process.poll()
+            
+            if self._coot_process == None:
+                self._coot_timer = wx.Timer(self, 201)
+                wx.EVT_TIMER(self, 201, self.check_coot)
+                self._coot_timer.Start(250, False)
 
-            try:
-                # need to reset env to get coot to load
-                self._coot_process = subprocess.Popen(['/Applications/coot.app/Contents/MacOS/coot', '--script='+self._settings.proot+'Coot.py'], shell=False, env={'DISPLAY': os.environ['DISPLAY'], 'HOME': os.environ['HOME']})
-            except:
-                wx.MessageBox('Couldnt Start Coot', 'Proton8 couldnt find coot', style=wx.OK | wx.CENTRE)
+                try:
+                    # need to reset env to get coot to load
+                    self._coot_process = subprocess.Popen([coot_exe, '--script='+self._settings.proot+'Coot.py'], shell=False, env={'DISPLAY': os.environ['DISPLAY'], 'HOME': os.environ['HOME']})
+                except:
+                    wx.MessageBox('Couldnt Start Coot', 'Proton8 couldnt find coot', style=wx.OK | wx.CENTRE)
+        else:
+            wx.MessageBox('Couldnt Start Coot', 'You need to set the path to coot in the settings panel before launching', style=wx.OK | wx.CENTRE)
 
     
     def check_coot(self, event):
@@ -236,11 +240,11 @@ class SettingsDialog(wx.Dialog):
         self.sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
 
         self.sizer.Add(wx.StaticText(self, -1, 'Coot Path'), 0, wx.EXPAND)
-        self._coot = FileBrowser(self, self.s.val('coot'), 'Select your COOT directory')
+        self._coot = ValidFileBrowser(self, '', 'Select your COOT directory', val=self.s.val('coot'), path='[P]/Contents/MacOS/coot')
         self.sizer.Add(self._coot.sizer(), 0, wx.EXPAND)
             
         self.sizer.Add(wx.StaticText(self, -1, 'PHENIX Path'), 0, wx.EXPAND)
-        self._phenix = FileBrowser(self, self.s.val('phenix'), 'Select your PHENIX directory', dir=True)
+        self._phenix = ValidFileBrowser(self, '', 'Select your PHENIX directory', dir=True, val=self.s.val('phenix'), path='[P]/Contents/[b]/elbow')
         self.sizer.Add(self._phenix.sizer(), 0, wx.EXPAND)
         
         self._ok = wx.Button(self, -1, 'Save')
@@ -269,7 +273,7 @@ class SettingsDialog(wx.Dialog):
         self.s.val('coot', self._coot.file())
         self.s.val('phenix', self._phenix.file())
 
-        self._on_close()
+        self._on_close('')
 
 
 # ----------------------------------------------------------------------------
@@ -339,8 +343,8 @@ class CootClient:
         self._server = xmlrpclib.Server('http://localhost:41734')
 
     def __getattr__(self, name):
-        if self._start_coot is not None:
-            self._start_coot('')
+        #if self._start_coot is not None:
+        #    self._start_coot('')
         return _Method(self._server, name)
 
 

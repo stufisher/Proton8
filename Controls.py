@@ -1,6 +1,7 @@
 import wx
 import os
 
+import wxtbx.bitmaps
 
 # File browser control
 class FileBrowser:
@@ -52,3 +53,32 @@ class FileBrowser:
     
     def sizer(self):
         return self._browse_sizer
+
+
+class ValidFileBrowser(FileBrowser):
+    def __init__(self, *args, **kwargs):
+        FileBrowser.__init__(self, *args, **kwargs)
+
+        self._path = kwargs['path']
+        
+        self._valid = wx.StaticBitmap(self._parent, size=(16,16))
+        self._browse_sizer.Add(self._valid, 0, wx.EXPAND|wx.ALL, 2)
+    
+        self._validate()
+
+
+    def _get_file(self, event):
+        FileBrowser._get_file(self, event)
+        self._validate()
+
+        
+    def _validate(self):
+        path = self._path.replace('[P]', self.file()).replace('[p]', self.file().lower())
+        path = path.replace('[B]', os.path.basename(self.file())).replace('[b]', os.path.basename(self.file()).lower())
+        
+        print path
+        if os.path.exists(path):
+            self._valid.SetBitmap(wxtbx.bitmaps.fetch_icon_bitmap('actions', 'ok', scale=(16,16)))
+        else:
+            self._valid.SetBitmap(wxtbx.bitmaps.fetch_icon_bitmap('actions', 'no', scale=(16,16)))
+
