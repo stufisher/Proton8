@@ -235,15 +235,19 @@ class Validation(Tab, scrolled.ScrolledPanel):
             for i, item in enumerate(['U1', 'U2', 'U3', 'No', 'Residue', 'Atom']):
                 split_list.InsertColumn(i, item, width=sizes[i])
     
-            for i,s in enumerate(self._split_sites):
-                split_list.InsertStringItem(i, str(s[0]))
-                split_list.SetStringItem(i, 1, str(s[1]))
-                split_list.SetStringItem(i, 2, str(s[2]))
-                
-                atom,id = s[3].split('_')
-                split_list.SetStringItem(i, 3, str(id))
-                split_list.SetStringItem(i, 4, str())
-                split_list.SetStringItem(i, 5, str(atom))
+            i = 0
+            for j,s in enumerate(self._split_sites):
+                if '_' in s[3]:
+                    split_list.InsertStringItem(i, str(s[0]))
+                    split_list.SetStringItem(i, 1, str(s[1]))
+                    split_list.SetStringItem(i, 2, str(s[2]))
+
+                    atom,id = s[3].split('_')
+                    
+                    split_list.SetStringItem(i, 3, str(id))
+                    split_list.SetStringItem(i, 4, str())
+                    split_list.SetStringItem(i, 5, str(atom))
+                    i += 1
 
             self.split_sizer.Add(wx.StaticText(self, -1, '%d possible split sites found' % len(self._split_sites)))
             self.split_sizer.Add(split_list, 0, wx.EXPAND|wx.ALL, 5)
