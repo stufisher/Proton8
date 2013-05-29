@@ -489,7 +489,7 @@ class NewCIF(wx.Dialog):
         wx.Dialog.__init__(self, parent, id, title)#, size=(330,340))
 
         self._browse = FileBrowser(self, 'CIF File (*.cif)|*.cif|MTZ File (*.mtz)|*.mtz', 'Select a reflection file', callback=self._refresh)
-        self._input_sizer = wx.FlexGridSizer(cols=2, rows=3, hgap=5, vgap=5)
+        self._input_sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
         self._inputs = [
             wx.StaticText(self, -1, 'Reflection'),
             self._browse.sizer(),
@@ -503,17 +503,19 @@ class NewCIF(wx.Dialog):
             self._input_sizer.Add(self._inputs[i], 0, wx.EXPAND)
 
         self._buttons = wx.BoxSizer(wx.HORIZONTAL)
-        self._buttons.Add(wx.Button(self, 0, 'Import'), 0, wx.EXPAND|wx.ALL, 5)
-        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 0, wx.EXPAND|wx.ALL, 5)
+        self._buttons.Add(wx.Button(self, 0, 'Import'), 1, wx.EXPAND|wx.ALL, 5)
+        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 1, wx.EXPAND|wx.ALL, 5)
+                
+        self._input_sizer.Add((10,10), 1, wx.EXPAND)
+        self._input_sizer.Add(self._buttons, 1, wx.EXPAND)
                 
         self.Bind(wx.EVT_BUTTON, self._import, id=0)
         self.Bind(wx.EVT_BUTTON, self._close, id=1)          
         
-        self.main = wx.BoxSizer(wx.VERTICAL)
-        self.main.Add(self._input_sizer, 0, wx.EXPAND|wx.ALL, 5)
-        self.main.Add(self._buttons, 0, wx.EXPAND|wx.LEFT, 65)
-        
-        self.SetSizer(self.main)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self._input_sizer, 1, wx.EXPAND|wx.ALL, 5)
+                
+        self.SetSizer(self.sizer)
         self.Fit()
         
 
@@ -545,21 +547,24 @@ class NewPDB(wx.Dialog):
     def __init__(self, parent, id, title):
         wx.Dialog.__init__(self, parent, id, title)#, size=(330,340))
 
-        self._input_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._input_sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
         self._browse = FileBrowser(self, '*.pdb', 'Select a PDB File')
         self._input_sizer.Add(wx.StaticText(self, -1, 'PDB File'), 0, wx.EXPAND|wx.TOP|wx.LEFT, 5)
         self._input_sizer.Add(self._browse.sizer())
 
         self._buttons = wx.BoxSizer(wx.HORIZONTAL)
-        self._buttons.Add(wx.Button(self, 0, 'Import'), 0, wx.EXPAND|wx.ALL, 5)
-        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 0, wx.EXPAND|wx.ALL, 5)
-                
+        self._buttons.Add(wx.Button(self, 0, 'Import'), 1, wx.EXPAND|wx.ALL, 5)
+        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 1, wx.EXPAND|wx.ALL, 5)
+        
+        self._input_sizer.Add((10,10), 1, wx.EXPAND)
+        self._input_sizer.Add(self._buttons, 1, wx.EXPAND)
+        
+        
         self.Bind(wx.EVT_BUTTON, self._import, id=0)
         self.Bind(wx.EVT_BUTTON, self._close, id=1)          
         
         self.main = wx.BoxSizer(wx.VERTICAL)
         self.main.Add(self._input_sizer, 0, wx.EXPAND|wx.ALL, 5)
-        self.main.Add(self._buttons, 0, wx.EXPAND|wx.LEFT, 70)
         
         self.SetSizer(self.main)
         self.Fit()
