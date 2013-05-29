@@ -208,7 +208,6 @@ class Analyse(Tab):
             self._set_residue_type('')
                 
             self.draw()
-    a=
     
     def _set_residue_type(self, event):
         self._residue_type = self._rtypes.index(self._data_widgets[5].GetValue())
