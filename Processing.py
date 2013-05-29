@@ -786,31 +786,32 @@ class NewRefinement(wx.Dialog):
         self.Fit()
                 
     def _set_res(self, event):
-        ref = self._ref_files[self._reflections.GetCurrentSelection()]
-        ins = self._in_files[self._structure.GetCurrentSelection()]
-        
-        
-        if os.path.exists(ref) and os.path.exists(ins):
-            hkl = hklf.reader(open(ref))
-            try:
-                ma = hkl.as_miller_arrays(crystal_symmetry=crystal_symmetry_from_ins.extract_from(ins))
-            except:
-                return
+        if len(self._ref_files) > 0 and len(self._in_files) > 0:        
+            ref = self._ref_files[self._reflections.GetCurrentSelection()]
+            ins = self._in_files[self._structure.GetCurrentSelection()]
+            
+            
+            if os.path.exists(ref) and os.path.exists(ins):
+                hkl = hklf.reader(open(ref))
+                try:
+                    ma = hkl.as_miller_arrays(crystal_symmetry=crystal_symmetry_from_ins.extract_from(ins))
+                except:
+                    return
+                    
+                rr = ma[0].resolution_range()
                 
-            rr = ma[0].resolution_range()
-            
-            self._res_high.SetValue(str(round(rr[1], 2)))
-            self._res_low.SetValue(str(round(rr[0], 2)))
-            
-            ins_obj = Shelx(ins)
-            self._hydrogens.SetValue(ins_obj.has_hydrogen())
-            
-            self._residues.Clear()
-            self._residue_list = []
-            for r in sorted(ins_obj.residue_list()):
-                if r not in (ShelxData._r + ['HOH', 'DOD', 'CL', 'MG']) or (r in ['ASP', 'GLU', 'HIS', 'ARG']):
-                    self._residues.Append(r)
-                    self._residue_list.append(r)
+                self._res_high.SetValue(str(round(rr[1], 2)))
+                self._res_low.SetValue(str(round(rr[0], 2)))
+                
+                ins_obj = Shelx(ins)
+                self._hydrogens.SetValue(ins_obj.has_hydrogen())
+                
+                self._residues.Clear()
+                self._residue_list = []
+                for r in sorted(ins_obj.residue_list()):
+                    if r not in (ShelxData._r + ['HOH', 'DOD', 'CL', 'MG']) or (r in ['ASP', 'GLU', 'HIS', 'ARG']):
+                        self._residues.Append(r)
+                        self._residue_list.append(r)
 
     
     def _close(self, event):

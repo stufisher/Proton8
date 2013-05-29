@@ -239,28 +239,26 @@ class SettingsDialog(wx.Dialog):
 
         self.sizer = wx.FlexGridSizer(cols=2, rows=0, hgap=5, vgap=5)
 
-        self.sizer.Add(wx.StaticText(self, -1, 'Coot Path'), 0, wx.EXPAND)
+        self.sizer.Add(wx.StaticText(self, -1, 'Coot Path'), 0, wx.EXPAND|wx.ALL, 5)
         self._coot = ValidFileBrowser(self, '', 'Select your COOT directory', val=self.s.val('coot'), path='[P]/Contents/MacOS/coot')
-        self.sizer.Add(self._coot.sizer(), 0, wx.EXPAND)
+        self.sizer.Add(self._coot.sizer(), 0, wx.EXPAND|wx.ALL, 5)
             
-        self.sizer.Add(wx.StaticText(self, -1, 'PHENIX Path'), 0, wx.EXPAND)
+        self.sizer.Add(wx.StaticText(self, -1, 'PHENIX Path'), 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
         self._phenix = ValidFileBrowser(self, '', 'Select your PHENIX directory', dir=True, val=self.s.val('phenix'), path='[P]/Contents/[b]/elbow')
-        self.sizer.Add(self._phenix.sizer(), 0, wx.EXPAND)
+        self.sizer.Add(self._phenix.sizer(), 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
         
         self._ok = wx.Button(self, -1, 'Save')
         self._cb = wx.Button(self, -1, 'Close')
         self._cb.Bind(wx.EVT_BUTTON, self._on_close)
         self._ok.Bind(wx.EVT_BUTTON, self._save)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_sizer.Add(self._ok)
-        self.button_sizer.Add(self._cb)
-            
-            
-        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.main_sizer.Add(self.sizer, 1, wx.EXPAND|wx.ALL, 5)
-        self.main_sizer.Add(self.button_sizer, 0, wx.EXPAND|wx.ALL, 5)
+        self.button_sizer.Add(self._ok, 1, wx.EXPAND|wx.ALL, 5)
+        self.button_sizer.Add(self._cb, 1, wx.EXPAND|wx.ALL, 5)
         
-        self.SetSizer(self.main_sizer)
+        self.sizer.Add((10,10), 1, wx.EXPAND)
+        self.sizer.Add(self.button_sizer, 1, wx.EXPAND|wx.ALL, 5)
+        
+        self.SetSizer(self.sizer)
         self.Fit()
 
 

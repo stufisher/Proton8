@@ -6,7 +6,7 @@ import wx
 from Tab import Tab
 from Project import Project
 
-class Settings:
+class Settings(object):
     def __init__(self):
         self._settings = { 'project_roots': [], 'current_root': None, 'phenix': '', 'coot': '' }
         self._root = os.path.expanduser('~/.proton8')
@@ -32,7 +32,7 @@ class Settings:
     def _save(self):
         if not os.path.exists(self._root):
             os.mkdir(self._root)
-            
+
         file = open(self._root + '/settings.json', 'w')
         file.write(json.dumps(self._settings))
         file.close()
@@ -65,8 +65,8 @@ class Settings:
             if os.path.exists(root + os.sep + '.proton8' + os.sep + 'project.json'):
                 Tab._project = Project(root, cwd=True)
                 self.current = root
-
-                print os.getcwd()
+            else:
+                self.del_project(root)
     
     @save
     def add_project(self, root, title):

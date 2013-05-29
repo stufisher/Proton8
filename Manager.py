@@ -283,8 +283,7 @@ class Projects(Tab):
     def retrieve(self):
         print self.s.current
         if self.s.current is not None:
-            if os.path.exists(self.s.current) and os.path.exists(self.s.current + '/.proton8'):
-                #Tab._project = pickle.load(open(self.s.current + '/.proton8/project.pkl', 'rb'))
+            if os.path.exists(self.s.current) and os.path.exists(self.s.current + '/.proton8') and self.s.current in self.s.projects:
                 Tab._project = Project(self.s.current, cwd=True)
                 self._update_sb('Project: ' + Tab._project.title(), 1)
             else:
@@ -301,7 +300,9 @@ class Projects(Tab):
         return self._project
 
     def _delete_project(self, event):
-        pass
+        sel = self.project_list.GetFirstSelected()
+        if sel < len(self.s.projects):
+            self.s.del_project(self.s.projects[sel])
 
     def _new_project(self, event):
         dlg = NewProject(self, -1, 'New Project')
@@ -314,7 +315,6 @@ class Projects(Tab):
 
     def _load_project(self, event):
         sel = self.project_list.GetFirstSelected()
-        
         if sel < len(self.s.projects):
             self.s.load_project(self.s.projects[sel])
             self.refresh_tabs()
@@ -347,45 +347,29 @@ class NewProject(wx.Dialog):
         
         self.input_sizer = wx.FlexGridSizer(cols=2, rows=0, vgap=5, hgap=5)
             
-        self.input_sizer.Add(wx.StaticText(self, -1, 'Title'), 0, wx.EXPAND)
+        self.input_sizer.Add(wx.StaticText(self, -1, 'Title'), 0, wx.EXPAND|wx.ALL, 5)
         self._title = wx.TextCtrl(self, -1, '')
-        self.input_sizer.Add(self._title, 0, wx.EXPAND)
+        self.input_sizer.Add(self._title, 0, wx.EXPAND|wx.ALL, 5)
             
-        self.input_sizer.Add(wx.StaticText(self, -1, 'Project Root'), 0, wx.EXPAND)
-        self._root_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        browse = wx.Button(self, -1, 'Browse')
-        browse.Bind(wx.EVT_BUTTON, self._get_root)
-        self._root_lab = wx.TextCtrl(self, -1, '', size=(200,20))
-        self._root_sizer.Add(self._root_lab, 0, wx.EXPAND)
-        self._root_sizer.Add(browse, 0, wx.EXPAND)
-        
-        self.input_sizer.Add(self._root_sizer, 0, wx.EXPAND)
+        self.input_sizer.Add(wx.StaticText(self, -1, 'Project Root'), 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
+        self._browser = FileBrowser(self, '', 'Select a Project Directory', dir=True)
+        self.input_sizer.Add(self._browser.sizer(), 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
             
         self._buttons = wx.BoxSizer(wx.HORIZONTAL)
-        self._buttons.Add(wx.Button(self, 0, 'Create'), 0, wx.EXPAND|wx.ALL, 5)
-        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 0, wx.EXPAND|wx.ALL, 5)
+        self._buttons.Add(wx.Button(self, 0, 'Create'), 1, wx.EXPAND|wx.ALL, 5)
+        self._buttons.Add(wx.Button(self, 1, 'Cancel'), 1, wx.EXPAND|wx.ALL, 5)
                 
         self.Bind(wx.EVT_BUTTON, self._create, id=0)
         self.Bind(wx.EVT_BUTTON, self._cancel, id=1)    
-            
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.input_sizer, 0, wx.EXPAND|wx.ALL, 5)
-        self.sizer.Add(self._buttons, 0, wx.EXPAND|wx.ALL, 5)
         
-        self.SetSizer(self.sizer)
+        self.input_sizer.Add((10,10), 1, wx.EXPAND)
+        self.input_sizer.Add(self._buttons, 1, wx.EXPAND|wx.ALL, 5)
+        
+        self.SetSizer(self.input_sizer)
         self.Fit()
         
     def vals(self):
-        return self._title.GetValue(), self._root
-
-    def _get_root(self, event):
-        dlg = wx.DirDialog(self, "Select a Project Directory", os.getcwd())
-        if dlg.ShowModal() == wx.ID_OK:
-            self._root = str(dlg.GetPath())
-            
-            self._root_lab.SetLabel(self._root)
-            
-        dlg.Destroy()
+        return self._title.GetValue(), self._browser.file()
         
     def _create(self, event):
         self.EndModal(1)
