@@ -303,6 +303,8 @@ class Projects(Tab):
         sel = self.project_list.GetFirstSelected()
         if sel < len(self.s.projects):
             self.s.del_project(self.s.projects[sel])
+            self.refresh_tabs()
+    
 
     def _new_project(self, event):
         dlg = NewProject(self, -1, 'New Project')
