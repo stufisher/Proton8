@@ -56,7 +56,7 @@ class BondLengths(Tab):
         self.ax1.tick_params(labelsize=8)
         self.ax2.tick_params(labelsize=8)   
         
-        self._highlight = 0
+        self._highlight = -2
         
         self._bond_lengths = ''
         self._std_devs = ''
@@ -250,7 +250,7 @@ class BondLengths(Tab):
     def _set_residue_type(self, event):
         self._residue_type = self._rtypes.index(self.res_type.GetValue())
         self._update_lists()
-        self._highlight = -1
+        self._highlight = -2
         
         self.draw()
         
@@ -265,7 +265,7 @@ class BondLengths(Tab):
             #self._values[4].SetLabel(str(round(self._residues['avg']['b'], 2)))
 
     def _show_residue(self):
-        if self._highlight == -1:
+        if self._highlight == -2:
             return
     
         t  = self._rtypess[self._residue_type].lower()
@@ -325,11 +325,13 @@ class BondLengths(Tab):
     def _on_click(self,event):
         if event.xdata:
             id = int(round(event.xdata, 0))
-            if id < len(self._residue_selection):
+            if id < len(self._residue_selection) and id > -1:
                 self._highlight = id
+            else:
+                self._highlight = -2
     
         else:
-            self._highlight = -1
+            self._highlight = -2
     
         h = self._highlight
         self._highlight_span.set_xy(([h-0.5, 0],[h-0.5, 1],[h+0.5, 1],[h+0.5, 0],[h-0.5, 0]))
@@ -355,7 +357,7 @@ class BondLengths(Tab):
     
 
     def analyse(self):
-        self._highlight = -1
+        self._highlight = -2
         self._omitted, self._residues = self._pdbt.get_bond_lengths(self._bond_lengths)
 
         if os.path.exists(self._std_devs):
