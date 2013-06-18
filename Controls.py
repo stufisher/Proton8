@@ -31,7 +31,7 @@ class FileBrowser:
         
         self._browse_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._browse_sizer.Add(self._file, 3, wx.EXPAND)
-        self._browse_sizer.Add(self._browse, 1, wx.EXPAND)
+        self._browse_sizer.Add(self._browse, 1, wx.EXPAND|wx.ALL, 2)
 
     def _get_file(self, event):
         if self._dir:
