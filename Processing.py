@@ -25,6 +25,7 @@ from BondLengths import BondLengths
 from AutoProcess import AutoProcessManager, AutoProcess
 from Controls import FileBrowser
 from Polygon import Compare
+from Extrapolate import Extrapolate
 
 import matplotlib
 matplotlib.use('WXAgg', False)
@@ -469,6 +470,10 @@ class Holder(Tab):
         self._tabs.AddPage(self._tab_list[-1], 'Bond Lengths')
     
 
+        self._tab_list.append(Extrapolate(self))
+        self._tab_list[-1].load_refinement(ref, self._stats.parameters())
+        self._tabs.AddPage(self._tab_list[-1], 'Extrapolate')
+        
         self._tab_list[0].set_residues(self._tab_list[2].residues())
         self._tab_list[0].load_refinement(ref)
         self._tab_list[1].set_stats(self._tab_list[0].stats)

@@ -2,13 +2,18 @@ import iotbx.pdb
 
 class PDBTools:
 
-    def __init__(self):
-        pass
+    _pdb_file = None
+    _weights = { 'C': 12, 'O': 16, 'N': 14, 'S': 16, 'P': 15, 'H': 1 }
+    
+    def __init__(self, file_name=None):
+        if file_name is not None:
+            print file_name
+            self._pdb_file = iotbx.pdb.input(file_name=file_name)
 
     def get_bond_lengths(self, pdb_file):
         self._omitted = {'asp': [], 'glu': [], 'his': [], 'arg': []}
         self._residues = {'asp': {}, 'glu': {}, 'his': {}, 'arg': {}}
-
+        
         b_avg_array = [[],[],[]]
         rlist = {'asp': {}, 'glu': {}, 'his': {}, 'arg': {}}
         t = {'ASP': [' CG ', ' OD1', ' OD2'], 'GLU': [' CD ', ' OE1', ' OE2']} 
@@ -20,8 +25,8 @@ class PDBTools:
                 b_avg_array[1].append(a.b)
             
             if a.resname in ['ASP', 'ALA', 'HIS', 'ARG', 'LYS', 'GLN', 'GLU', 
-                            'TYR', 'PRO', 'LEU', 'ILE', 'MET', 'VAL', 'SER',
-                            'ASN', 'CYS', 'GLY', 'TRP', 'PHE', 'THR', 'LYS']:
+                             'TYR', 'PRO', 'LEU', 'ILE', 'MET', 'VAL', 'SER',
+                             'ASN', 'CYS', 'GLY', 'TRP', 'PHE', 'THR', 'LYS']:
                 b_avg_array[0].append(a.b)
         
             rid = int(a.resid())
@@ -102,7 +107,7 @@ class PDBTools:
             self._residues['avg'][k] = val
 
         #self._residues['avg'] = {'b': (sum(b_avg_array)/len(b_avg_array))}
-            
+        
         return self._omitted, self._residues
 
 
@@ -128,3 +133,40 @@ class PDBTools:
         
         return res_lookup
 
+
+    # Calculate rmm
+    def get_rmm(self, pdb_file=None):
+        if self._pdb_file is not None:
+            pdb = self._pdb_file
+        else:
+            pdb = iotbx.pdb.input(file_name=file)
+        
+        rmm = 0
+
+        for a in pdb.atoms_with_labels():
+            if a.resname in ['ASP', 'ALA', 'HIS', 'ARG', 'LYS', 'GLN', 'GLU',
+                             'TYR', 'PRO', 'LEU', 'ILE', 'MET', 'VAL', 'SER',
+                             'ASN', 'CYS', 'GLY', 'TRP', 'PHE', 'THR', 'LYS']:
+                
+                rmm += self._weights[a.name.strip()[0]] * a.occ
+
+        return rmm
+
+
+    def get_s(self, pdb_file=None):
+        if self._pdb_file is not None:
+            pdb = self._pdb_file
+        else:
+            pdb = iotbx.pdb.input(file_name=pdb_file)
+        
+        s = 0
+        tot = 0
+    
+        for a in pdb.atoms_with_labels():
+            if a.resname in ['DOD', 'HOH']:
+                if a.name.strip() == 'O':
+                    s += a.occ
+            else:
+                tot += a.occ
+
+        return s/tot
