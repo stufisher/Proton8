@@ -166,7 +166,6 @@ class PDBTools:
             if a.resname in ['DOD', 'HOH']:
                 if a.name.strip() == 'O':
                     s += a.occ
-            else:
-                tot += a.occ
+            tot += a.occ
 
         return s/tot
