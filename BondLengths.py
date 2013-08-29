@@ -285,7 +285,7 @@ class BondLengths(Tab):
         labels = {0: [[1,115,10,20],[2,5,85,95]], 
                   1: [[1,115,10,20],[2,5,85,95]], 
                   2: [[1,80,8,20],[2,0,132,142],[3,5,40,50],[4,130,138,148],[5,147,90,100]],
-                  3: [[1,115,135,145],[2,42,65,75],[2,70,2,12]]}
+                  3: [[1,115,135,145],[2,42,65,75],[3,70,2,12]]}
         
         temp1 = '%.1f' if self._residue_type == 2 else '%.3f'
         temp2 = '%.1f+%.1f' if self._residue_type == 2 else '%.3f+%.3f'
@@ -628,7 +628,7 @@ class BondLengths(Tab):
                 txt = 'Average B factor: %.1f, Average sigma: %.3f' % (self._residues['avg']['pro'],sum(el1+el2)/(len(el1)+len(el2)))
             
             self.averages.SetLabel(txt)
-            self.ax2.axhline(y=self._residues['avg']['pro'], color=(0.5,0.5,0), ls='--')
+            self.ax2.axhline(y=self._residues['avg']['pro'], color=(0.5,0.5,0), ls='--', label='B(avg)')
             self.ax2.set_ylim(min(b1+b2)-2, max(b1+b2)+20)
     
             self.ax2.set_xlim(-1, len(x))
