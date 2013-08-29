@@ -53,7 +53,7 @@ class Refinement:
     
         self._first = 0
         self._type = type
-        self._args = '-b20000' if options['target'] == LS else ''
+        self._args = '-b20000' if options['target'] == LS else '-a100000'
         self._input = input
         self._panel = panel
         
