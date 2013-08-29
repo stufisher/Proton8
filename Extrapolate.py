@@ -1,6 +1,7 @@
 import wx
 
 import numpy as np
+import math
 
 from iotbx.shelx import hklf, crystal_symmetry_from_ins
 from iotbx import pdb
@@ -56,6 +57,9 @@ class Extrapolate(Tab):
         self._rfree = wx.StaticText(self, -1, '')
         self.side_sizer.Add(self._rfree, 0, wx.EXPAND)
 
+        self.side_sizer.AddSpacer(20)
+        self.side_sizer.AddSpacer(20)
+        
         self.side_sizer.Add(wx.StaticText(self, -1, 'sig(x) R'), 0, wx.EXPAND)
         self._sigxr = wx.StaticText(self, -1, '')
         self.side_sizer.Add(self._sigxr, 0, wx.EXPAND)
@@ -64,6 +68,14 @@ class Extrapolate(Tab):
         self._sigxrf = wx.StaticText(self, -1, '')
         self.side_sizer.Add(self._sigxrf, 0, wx.EXPAND)
         
+        self.side_sizer.AddSpacer(20)
+        self.side_sizer.AddSpacer(20)
+        
+        self.side_sizer.Add(wx.StaticText(self, -1, 'sig(x) - 3sig (ASP)'), 0, wx.EXPAND)
+        self.side_sizer.Add(wx.StaticText(self, -1, '0.024'), 0, wx.EXPAND)
+        
+        self.side_sizer.Add(wx.StaticText(self, -1, 'sig(x) - 3sig (HIS)'), 0, wx.EXPAND)
+        self.side_sizer.Add(wx.StaticText(self, -1, ''), 0, wx.EXPAND)
         
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer.Add(self.side_sizer, 0, wx.EXPAND|wx.ALL, 10)
@@ -119,16 +131,18 @@ class Extrapolate(Tab):
             ys[5].append(sr*0.85)
     
         self.ax1.plot(x, ys[0], 'b-', label='R')
-        self.ax1.fill_between(x, ys[1], ys[2], alpha=0.15, facecolor='blue')
+        self.ax1.fill_between(x, ys[1], ys[2], alpha=0.1, facecolor='blue')
 
         self.ax1.plot(x, ys[3], 'g-', label='Rfree')
-        self.ax1.fill_between(x, ys[4], ys[5], alpha=0.15, facecolor='green')
+        self.ax1.fill_between(x, ys[4], ys[5], alpha=0.1, facecolor='green')
                 
         al = self.ax1.axis()
         yam = al[3]-al[2]
         xam = al[1]-al[0]
+
+        self.ax1.axhline(y=0.0236, color='purple', label='3sig (ASP)')
                 
-        self.ax1.axvline(x=dmin, ymin=0, ymax=(sigxr-al[2])/yam, color='0.7')
+        self.ax1.axvline(x=dmin, ymin=0, ymax=(sigxr-al[2])/yam, color='0.7', label='Actual')
         self.ax1.axhline(y=sigxr, xmin=0, xmax=(dmin-al[0])/xam, color='0.7')
         self.ax1.legend(prop={'size':8}, numpoints=1, loc='best', fancybox=True)
 
