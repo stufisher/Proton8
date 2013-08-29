@@ -105,21 +105,25 @@ class ProcessManager(Tab):
         tab.SetFocus()
         self.GetParent().SetSelection(1)
     
-    def new_refinement(self):
-        self._new_refinement('')
+    def new_refinement(self, **kwargs):
+        self._new_refinement(**kwargs)
     
     def auto_refinement(self):
         pass
     
-    def _new_refinement(self, event):
+    def _new_refinement(self, **kwargs):
         inputs, files = self._get_inputs()
         inputs2, files2 = self._get_root_files('ins')
         reflns, files3 = self._get_root_files()
         
         inputs = inputs2 + inputs
         files  = files2 + files
-    
-        dlg = NewRefinement(self, -1, 'New Refinement', inputs, reflns, files, files3)
+        
+        sel_hkl = kwargs['hkl'] if 'hkl' in kwargs else None
+        sel_ins = kwargs['ins'] if 'ins' in kwargs else None
+        resh = kwargs['resh'] if 'resh' in kwargs else None
+        
+        dlg = NewRefinement(self, -1, 'New Refinement', inputs, reflns, files, files3, sel_hkl, sel_ins, resh)
         val = dlg.ShowModal()
         
         if val == 1:
@@ -487,12 +491,18 @@ class Holder(Tab):
 # New Refinement Dialog
 class NewRefinement(wx.Dialog):
 
-    def __init__(self, parent, id, title, inputs, refls, in_files, ref_files):
+    def __init__(self, parent, id, title, inputs, refls, in_files, ref_files, selected_refls=None, selected_struct=None, resh=None):
         wx.Dialog.__init__(self, parent, id, title)
 
         self._in_files = in_files
         self._ref_files = ref_files
         self._residue_list = []
+        
+        if not selected_refls in refls:
+            selected_refls = None
+    
+        if not selected_struct in inputs:
+            selected_struct = None
         
         self.input_sizer = wx.FlexGridSizer(rows=0, cols=2, vgap=5, hgap=5)
         self.input_sizer.Add(wx.StaticText(self, -1, 'Title'))
@@ -501,7 +511,7 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._title, 0, wx.EXPAND)
             
         self.input_sizer.Add(wx.StaticText(self, -1, 'Reflections'))
-        self._reflections = wx.ComboBox(self, -1, choices=refls, style=wx.CB_READONLY)
+        self._reflections = wx.ComboBox(self, -1, selected_refls, choices=refls, style=wx.CB_READONLY)
         self._reflections.Bind(wx.EVT_COMBOBOX, self._set_res)
         self._view_refs = metallicbutton.MetallicButton(self, 0, '', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(22, 20))
         self.Bind(wx.EVT_BUTTON, self._view_file, self._view_refs)
@@ -513,7 +523,7 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._refs_sizer, 0, wx.EXPAND)
 
         self.input_sizer.Add(wx.StaticText(self, -1, 'Structure'))
-        self._structure = wx.ComboBox(self, -1, choices=inputs, style=wx.CB_READONLY)
+        self._structure = wx.ComboBox(self, -1, selected_struct, choices=inputs, style=wx.CB_READONLY)
         self._structure.Bind(wx.EVT_COMBOBOX, self._set_res)
         self._view_struct = metallicbutton.MetallicButton(self, 1, '', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(22, 20))
         self.Bind(wx.EVT_BUTTON, self._view_file, self._view_struct)
@@ -620,6 +630,9 @@ class NewRefinement(wx.Dialog):
         self.Fit()
         self._set_res('')
         self._hydrogens.SetValue(0)
+    
+        if resh is not None:
+            self._res_high.SetValue(str(resh))
 
     
     def _view_file(self, event):

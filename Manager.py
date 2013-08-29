@@ -146,7 +146,21 @@ class Jobs(Tab):
     @Tab.wproj
     def _new_job(self, event):
         if hasattr(self, 'new_refinement'):
-            self.new_refinement()
+            sel = self.job_list.GetFirstSelected()
+            
+            hkl = None
+            ins = None
+            
+            if sel > -1:
+                ids, files, dirs = self._get_inputs()
+                if os.path.exists(files[sel]):
+                    r = pickle.load(open(files[sel], 'rb'))
+                    p = r.parameters()
+        
+                    hkl = os.path.basename(p['hkl'])
+                    ins = dirs[sel].replace(self._project.root(), '')+'/Output'
+        
+            self.new_refinement(hkl=hkl,ins=ins,resh=p['res'])
 
     @Tab.wproj
     def _auto_job(self, event):
