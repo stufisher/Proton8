@@ -296,7 +296,8 @@ class PDBImporter:
                             
             # Nasty hack, need a better way to estimate the number of hydrogens...
             if not 'H' in atc:
-                atc['H'] = atc['C'] * 2
+                if 'C' in atc:
+                    atc['H'] = atc['C'] * 2
                             
                             
             for to_r in to_rem:
