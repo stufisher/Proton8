@@ -150,6 +150,7 @@ class Jobs(Tab):
             
             hkl = None
             ins = None
+            res = None
             
             if sel > -1:
                 ids, files, dirs = self._get_inputs()
@@ -159,8 +160,9 @@ class Jobs(Tab):
         
                     hkl = os.path.basename(p['hkl'])
                     ins = dirs[sel].replace(self._project.root(), '')+'/Output'
+                    res = p['res']
         
-            self.new_refinement(hkl=hkl,ins=ins,resh=p['res'])
+            self.new_refinement(hkl=hkl,ins=ins,resh=res)
 
     @Tab.wproj
     def _auto_job(self, event):
