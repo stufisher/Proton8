@@ -511,7 +511,7 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._title, 0, wx.EXPAND)
             
         self.input_sizer.Add(wx.StaticText(self, -1, 'Reflections'))
-        self._reflections = wx.ComboBox(self, -1, selected_refls, choices=refls, style=wx.CB_READONLY)
+        self._reflections = wx.ComboBox(self, -1, choices=refls, style=wx.CB_READONLY)
         self._reflections.Bind(wx.EVT_COMBOBOX, self._set_res)
         self._view_refs = metallicbutton.MetallicButton(self, 0, '', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(22, 20))
         self.Bind(wx.EVT_BUTTON, self._view_file, self._view_refs)
@@ -523,7 +523,7 @@ class NewRefinement(wx.Dialog):
         self.input_sizer.Add(self._refs_sizer, 0, wx.EXPAND)
 
         self.input_sizer.Add(wx.StaticText(self, -1, 'Structure'))
-        self._structure = wx.ComboBox(self, -1, selected_struct, choices=inputs, style=wx.CB_READONLY)
+        self._structure = wx.ComboBox(self, -1, choices=inputs, style=wx.CB_READONLY)
         self._structure.Bind(wx.EVT_COMBOBOX, self._set_res)
         self._view_struct = metallicbutton.MetallicButton(self, 1, '', '', bitmaps.fetch_icon_bitmap('actions', 'viewmag', scale=(16,16)), size=(22, 20))
         self.Bind(wx.EVT_BUTTON, self._view_file, self._view_struct)
@@ -628,9 +628,17 @@ class NewRefinement(wx.Dialog):
             c.Hide()
 
         self.Fit()
-        self._set_res('')
-        self._hydrogens.SetValue(0)
     
+        if selected_refls in refls or selected_struct in inputs:
+            if selected_refls in refls:
+                self._reflections.SetStringSelection(selected_refls)
+            if selected_struct in inputs:
+                self._structure.SetStringSelection(selected_struct)
+        else:
+            self._hydrogens.SetValue(0)
+
+        self._set_res('')
+
         if resh is not None:
             self._res_high.SetValue(str(resh))
 
